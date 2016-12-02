@@ -1,0 +1,9 @@
+#ABNF 1.0 UTF-8;
+language zh-CN; 
+mode voice;
+
+root $main;
+$main = [$prefix] [$id] $device;
+$prefix = 上|下|调;
+$id = [$digit <1-4>];
+$name = 信号楼|信号机|道岔|电缆号|轨道电路;
