@@ -70,8 +70,9 @@ public class MainActivity extends AppCompatActivity {
         mToast = Toast.makeText(this, "", Toast.LENGTH_SHORT);
         mVoiceText = (TextView) findViewById(R.id.tv_voice_info);
         SpeechUtility.createUtility(this, SpeechConstant.APPID + APPID);
-
+        mIvw = VoiceWakeuper.createWakeuper(mContext, null);
         mCloudGrammar = readFile(this, "jinglutong_grammar.abnf", "utf-8");
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -154,6 +155,9 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
+    private String getWakeupResource() {
+        return ResourceUtil.generateResourcePath(mContext, ResourceUtil.RESOURCE_TYPE.assets, WAKEUP_RES);
+    }
     public void initWakeup() {
         //1.加载唤醒词资源，resPath为唤醒资源路径
         int curThresh = 5;
@@ -162,8 +166,6 @@ public class MainActivity extends AppCompatActivity {
         param.append(ResourceUtil.IVW_RES_PATH + "=" + resPath);
         param.append(","+ResourceUtil.ENGINE_START + "=" + SpeechConstant.ENG_IVW);
         SpeechUtility.getUtility().setParameter(ResourceUtil.ENGINE_START,param.toString());
-        //2.创建VoiceWakeuper对象
-        mIvw = VoiceWakeuper.createWakeuper(mContext, null);
 
         //mCloudGrammar = readFile(this, "sample.abnf", "utf-8");
         //3.设置唤醒参数
@@ -176,6 +178,7 @@ public class MainActivity extends AppCompatActivity {
             mIvw.setParameter(SpeechConstant.IVW_SST,"wakeup");
             //设置唤醒一直保持，直到调用stopListening，传入0则完成一次唤醒后，会话立即结束（默认0）
             mIvw.setParameter(SpeechConstant.KEEP_ALIVE,"1");
+     //           mIvw.setParameter(SpeechConstant.IVW_RES_PATH, getWakeupResource());
             //4.开始唤醒
             Log.i(TAG,"Start wakeupListener");
             mIvw.startListening(mWakeuperListener);
@@ -391,6 +394,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        Log.i(TAG,"Stop wakeupListener");
         mIvw.stopListening();
         super.onDestroy();
     }
