@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "wumin";
     private TextView mVoiceText = null;
     private VoiceSynthesizer mVSynthesizer;
-    private VoiceRecognizer mRDialog;
+    private VoiceRecognizer mVRecognizer;
     private VoiceWakeup mVWakeup;
     private Toast mToast;
     private Context mContext = null;
@@ -57,12 +57,12 @@ public class MainActivity extends AppCompatActivity {
         mContext = this;
         mToast = Toast.makeText(this, "", Toast.LENGTH_SHORT);
         mVoiceText = (TextView) findViewById(R.id.tv_voice_info);
-        SpeechUtility.createUtility(this, SpeechConstant.APPID + getString(R.string.appid));
+        SpeechUtility.createUtility(this, SpeechConstant.APPID + "=" + getString(R.string.appid));
 
         mVSynthesizer = new VoiceSynthesizer(MainActivity.this);
         mVSynthesizer.startSpeechSynthesizer();
 
-        mRDialog = new VoiceRecognizer(this);
+        mVRecognizer = new VoiceRecognizer(this);
 
         mVWakeup = new VoiceWakeup(this);
         mVWakeup.startWakeup();
@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Log.i(TAG, "start voice");
-                mRDialog.showVoiceRecognizeDialog();
+                mVRecognizer.showVoiceRecognizeDialog();
 //                mVSynthesizer.speakMsg("欢迎使用小七语音助手");
 
             }
