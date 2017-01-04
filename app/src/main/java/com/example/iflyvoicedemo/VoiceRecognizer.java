@@ -2,11 +2,11 @@ package com.example.iflyvoicedemo;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.iflytek.cloud.ErrorCode;
-import com.iflytek.cloud.GrammarListener;
 import com.iflytek.cloud.InitListener;
 import com.iflytek.cloud.LexiconListener;
 import com.iflytek.cloud.RecognizerListener;
@@ -17,17 +17,31 @@ import com.iflytek.cloud.SpeechRecognizer;
 import com.iflytek.cloud.ui.RecognizerDialog;
 import com.iflytek.cloud.ui.RecognizerDialogListener;
 
+import java.util.logging.MemoryHandler;
+
 /**
  * Created by Administrator on 2016/12/5.
  */
 
 public class VoiceRecognizer {
     private static String TAG = "wumin VoiceRecognizer";
+    private Handler mHandler = null;
     private Context mContext = null;
     private RecognizerDialog recognizerDialog;
     private SpeechRecognizer mIat;
-    public VoiceRecognizer(Context context) {
+    public static final int START_VOICE = 0;
+    public static final int START_SPEAK = 1;
+    public static final int STOP_SPEAK = 2;
+    public static final int START_RECOGNIZE = 3;
+    public static final int STOP_RECOGNIZE = 4;
+    public static final int RECOGNIZE_ERROR = 5;
+    public static final int RECOGNIZE_FINISH = 6;
+    public static final int SPEAK_NULL = 7;
+    public static final int NET_ERROR = 8;
+
+    public VoiceRecognizer(Context context, Handler handler) {
         mContext = context;
+        mHandler = handler;
     }
 
     private RecognizerDialogListener mRecognizeListener = new RecognizerDialogListener() {
@@ -77,27 +91,36 @@ public class VoiceRecognizer {
     }
 
     //听写监听器
-    private RecognizerListener mRecoListener = new RecognizerListener(){
+    private RecognizerListener mRecogListener = new RecognizerListener(){
         public void onResult(RecognizerResult results, boolean isLast) {
             Log.i(TAG, "Recognize result : "+ results.getResultString());
             String voiceInfo = JsonParser.parseIatResult(results.getResultString());
             if (voiceInfo.compareTo("last") == 0)
                 return;
+            Log.i(TAG, "Recognize => "+ voiceInfo);
             Toast.makeText(mContext, voiceInfo, Toast.LENGTH_LONG).show();
+            mHandler.sendEmptyMessage(RECOGNIZE_FINISH);
         }
         //会话发生错误回调接口
         public void onError(SpeechError error) {
             error.getPlainDescription(true); //获取错误码描述
             int errCode = error.getErrorCode();
             String msg;
+            int errType = RECOGNIZE_ERROR;
             switch (errCode) {
                 case 10118:
                     msg = "您未说话，请重试！";
+                    errType = SPEAK_NULL;
+                    break;
+                case 20001:
+                    msg = "网络未连接，请重试！";
+                    errType = NET_ERROR;
                     break;
                 default:
-                    msg = "识别错误，请重试！";
+                    msg = "会话失败，请重试！";
                     break;
             }
+            mHandler.sendEmptyMessage(errType);
             Toast.makeText(mContext, msg + "Error code : " + error.getErrorCode(), Toast.LENGTH_LONG).show();
         }
 
@@ -115,6 +138,7 @@ public class VoiceRecognizer {
         //结束录音
         public void onEndOfSpeech() {
             Log.i(TAG, "onEndOfSpeech...");
+            mHandler.sendEmptyMessage(START_RECOGNIZE);
         }
         //扩展用接口
         public void onEvent(int eventType, int arg1, int arg2, Bundle obj) {}
@@ -129,19 +153,18 @@ public class VoiceRecognizer {
         mIat.setParameter(SpeechConstant.ENGINE_TYPE, SpeechConstant.TYPE_CLOUD);
         mIat.setParameter(SpeechConstant.TEXT_ENCODING, "utf-8");
         //mIat.buildGrammar("abnf", mCloudGrammar, grammarListener);
-        mIat.startListening(mRecoListener);
+        mIat.startListening(mRecogListener);
+        mHandler.sendEmptyMessage(START_VOICE);
     }
 
-    GrammarListener grammarListener = new GrammarListener() {
-        @Override
-        public void onBuildFinish(String grammarId, SpeechError error) {
-            if (error == null) {
-                Toast.makeText(mContext, "语法构建成功：" + grammarId, Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(mContext, "语法构建失败,错误码：" + error.getErrorCode(), Toast.LENGTH_LONG).show();
-            }
+    public void stopSpeechRecognizer() {
+        Log.i(TAG, "stopSpeechRecognizer...");
+        if (mIat.isListening()) {
+            Log.i(TAG, "isListening...");
+            mIat.stopListening();
         }
-    };
+        mIat.cancel();
+    }
     /**
      * 上传联系人/词表监听器。
      */

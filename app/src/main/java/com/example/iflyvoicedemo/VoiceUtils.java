@@ -37,4 +37,9 @@ public class VoiceUtils {
         return ResourceUtil.generateResourcePath(mContext, ResourceUtil.RESOURCE_TYPE.assets, wake_res);
     }
 
+    public static int px2sp(Context context, float pxValue) {
+        final float fontScale = context.getResources().getDisplayMetrics().scaledDensity;
+        return (int) (pxValue / fontScale + 0.5f);
+    }
+
 }
