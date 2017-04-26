@@ -22,6 +22,8 @@ import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.iflyvoicedemo.view.VoicePopupWindows;
 import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechUtility;
 
@@ -40,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout mSpeakErrLayout;
     private TextView mMsgText;
     private ImageView mMsgImage;
+    private VoicePopupWindows mVoiceWindows;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,37 +82,18 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void dardBackground(Activity context, float alpha) {
-        WindowManager.LayoutParams lp = context.getWindow().getAttributes();
-        lp.alpha = alpha;
-        context.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        context.getWindow().setAttributes(lp);
-    }
-
     public void startVoice(View view) {
-        View popupView = LayoutInflater.from(mContext).inflate(R.layout.popupwindow_voice, null);
-        mProgressLayout = (FrameLayout)popupView.findViewById(R.id.fl_progressbar);
-        mSpeakLayout = (LinearLayout)popupView.findViewById(R.id.ll_speak_image);
-        mSpeakErrLayout = (LinearLayout)popupView.findViewById(R.id.ll_speak_err);
-        mMsgText = (TextView)popupView.findViewById(R.id.tv_msg_text);
-        mMsgImage = (ImageView)popupView.findViewById(R.id.iv_msg_image);
-        mPopupWindows = new PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        mPopupWindows.setTouchable(true);
-        mPopupWindows.setFocusable(true);
-        mPopupWindows.setOutsideTouchable(true);
-        mPopupWindows.setBackgroundDrawable(new ColorDrawable());
-        mPopupWindows.setAnimationStyle(R.style.popwindow_voice_anim);
-        mPopupWindows.getBackground().setAlpha(50);
-        dardBackground(this, 0.4f);
-        mPopupWindows.showAtLocation(view, Gravity.CENTER, 0 ,0);
-        mPopupWindows.setOnDismissListener(new PopupWindow.OnDismissListener() {
+        mVoiceWindows = new VoicePopupWindows(mContext);
+        mVoiceWindows.setDismissListener(this, new PopupWindow.OnDismissListener() {
             @Override
             public void onDismiss() {
                 mVRecognizer.stopSpeechRecognizer();
-                dardBackground(MainActivity.this, 1.0f);
+                mVoiceWindows.dismiss(MainActivity.this);
             }
         });
+        mVoiceWindows.show(this, view);
     }
+
     public void onDebug(View view) {
         mVRecognizer.showVoiceRecognizeDialog();
     }
@@ -122,29 +106,22 @@ public class MainActivity extends AppCompatActivity {
                     startVoice(getWindow().getDecorView());
                     break;
                 case VoiceRecognizer.START_RECOGNIZE:
-                    mSpeakLayout.setVisibility(View.INVISIBLE);
-                    mProgressLayout.setVisibility(View.VISIBLE);
+                    mVoiceWindows.showProgress();
                     break;
                 case VoiceRecognizer.RECOGNIZE_ERROR:
-                    mMsgText.setText(getString(R.string.recognize_err));
-                    mMsgImage.setImageResource(R.drawable.warning);
-                    mProgressLayout.setVisibility(View.GONE);
-                    mSpeakErrLayout.setVisibility(View.VISIBLE);
+                    mVoiceWindows.showMsg(getString(R.string.recognize_err), R.drawable.warning);
                     break;
                 case VoiceRecognizer.SPEAK_NULL:
-                    mMsgText.setText(getString(R.string.speak_null));
-                    mMsgImage.setImageResource(R.drawable.warning);
-                    mProgressLayout.setVisibility(View.GONE);
-                    mSpeakErrLayout.setVisibility(View.VISIBLE);
+                    mVoiceWindows.showMsg(getString(R.string.speak_null), R.drawable.warning);
                     break;
                 case VoiceRecognizer.NET_ERROR:
-                    mMsgText.setText(getString(R.string.net_err));
-                    mMsgImage.setImageResource(R.drawable.warning);
-                    mProgressLayout.setVisibility(View.GONE);
-                    mSpeakErrLayout.setVisibility(View.VISIBLE);
+                    mVoiceWindows.showMsg(getString(R.string.net_err), R.drawable.warning);
                     break;
                 case VoiceRecognizer.RECOGNIZE_FINISH:
-                    mPopupWindows.dismiss();
+                    mVoiceWindows.dismiss();
+                    break;
+                default:
+                    mVoiceWindows.dismiss();
                     break;
             }
         }

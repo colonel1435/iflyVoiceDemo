@@ -29,21 +29,16 @@ public class JsonParser {
 			JSONTokener tokener = new JSONTokener(json);
 			JSONObject joResult = new JSONObject(tokener);
 
-			String last = joResult.getString("ls");
-			if (last == "true")
-				ret.append("last");
-			else {
-				JSONArray words = joResult.getJSONArray("ws");
-				for (int i = 0; i < words.length(); i++) {
-					JSONArray items = words.getJSONObject(i).getJSONArray("cw");
-					JSONObject obj = items.getJSONObject(0);
-					ret.append(obj.getString("w"));
-	//				for(int j = 0; j < items.length(); j++)
-	//				{
-	//					JSONObject obj = items.getJSONObject(j);
-	//					ret.append(obj.getString("w"));
-	//				}
-				}
+			JSONArray words = joResult.getJSONArray("ws");
+			for (int i = 0; i < words.length(); i++) {
+				JSONArray items = words.getJSONObject(i).getJSONArray("cw");
+				JSONObject obj = items.getJSONObject(0);
+				ret.append(obj.getString("w"));
+				//				for(int j = 0; j < items.length(); j++)
+				//				{
+				//					JSONObject obj = items.getJSONObject(j);
+				//					ret.append(obj.getString("w"));
+				//				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
