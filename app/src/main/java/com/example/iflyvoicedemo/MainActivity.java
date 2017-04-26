@@ -23,9 +23,14 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.iflyvoicedemo.bean.MsgVoiceEvent;
 import com.example.iflyvoicedemo.view.VoicePopupWindows;
 import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechUtility;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "wumin";
@@ -51,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        EventBus.getDefault().register(this);
         mContext = this;
         mToast = Toast.makeText(this, "", Toast.LENGTH_SHORT);
         mVoiceText = (TextView) findViewById(R.id.tv_voice_info);
@@ -97,6 +103,39 @@ public class MainActivity extends AppCompatActivity {
     public void onDebug(View view) {
         mVRecognizer.showVoiceRecognizeDialog();
     }
+
+    @Subscribe(threadMode=ThreadMode.MAIN)
+    public void onVoiceHandle(MsgVoiceEvent event) {
+        int type = event.getType();
+        String msg;
+        switch (type) {
+            case VoiceRecognizer.START_VOICE:
+                startVoice(getWindow().getDecorView());
+                break;
+            case VoiceRecognizer.START_RECOGNIZE:
+                mVoiceWindows.showProgress();
+                break;
+            case VoiceRecognizer.RECOGNIZE_ERROR:
+                msg = getString(R.string.recognize_err) + getString(R.string.err_code) + event.getErrCode() +")";
+                mVoiceWindows.showMsg(msg, R.drawable.warning);
+                break;
+            case VoiceRecognizer.SPEAK_NULL:
+                msg = getString(R.string.speak_null);
+                mVoiceWindows.showMsg(msg, R.drawable.warning);
+                break;
+            case VoiceRecognizer.NET_ERROR:
+                msg = getString(R.string.net_err);
+                mVoiceWindows.showMsg(msg, R.drawable.warning);
+                break;
+            case VoiceRecognizer.RECOGNIZE_FINISH:
+                mVoiceWindows.dismiss();
+                break;
+            default:
+                mVoiceWindows.dismiss();
+                break;
+        }
+    }
+
     public Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -130,6 +169,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         Log.i(TAG,"Stop wakeupListener");
         mVWakeup.stopWakeup();
+        EventBus.getDefault().unregister(this);
         super.onDestroy();
     }
 }

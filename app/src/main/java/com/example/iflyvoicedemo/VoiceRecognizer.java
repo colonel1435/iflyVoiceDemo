@@ -114,7 +114,7 @@ public class VoiceRecognizer {
 
             Log.i(TAG, "Recognize => "+ voiceInfo);
             Toast.makeText(mContext, voiceInfo, Toast.LENGTH_LONG).show();
-            mHandler.sendEmptyMessage(RECOGNIZE_FINISH);
+            EventBus.getDefault().post(new MsgVoiceEvent(RECOGNIZE_FINISH, voiceInfo));
         }
         //会话发生错误回调接口
         public void onError(SpeechError error) {
@@ -131,8 +131,7 @@ public class VoiceRecognizer {
                 default:
                     break;
             }
-            mHandler.sendEmptyMessage(errType);
-//            EventBus.getDefault().post(new MsgVoiceEvent(errCode, errType));
+            EventBus.getDefault().post(new MsgVoiceEvent(errCode, errType));
         }
 
         @Override
@@ -176,7 +175,7 @@ public class VoiceRecognizer {
         setParam();
         Log.i(TAG, "startSpeechRecognizer...");
         mIat.startListening(mRecogListener);
-        mHandler.sendEmptyMessage(START_VOICE);
+        EventBus.getDefault().post(new MsgVoiceEvent(START_VOICE));
     }
 
     public void stopSpeechRecognizer() {
