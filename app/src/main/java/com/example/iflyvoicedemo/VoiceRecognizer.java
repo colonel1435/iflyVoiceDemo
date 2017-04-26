@@ -9,6 +9,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.iflyvoicedemo.bean.MsgVoiceEvent;
+import com.example.iflyvoicedemo.utils.ChinesePhoneticUtils;
 import com.iflytek.cloud.ErrorCode;
 import com.iflytek.cloud.InitListener;
 import com.iflytek.cloud.LexiconListener;
@@ -113,8 +114,12 @@ public class VoiceRecognizer {
             }
 
             Log.i(TAG, "Recognize => "+ voiceInfo);
+            ChinesePhoneticUtils chinesePhoneticUtils = new ChinesePhoneticUtils(true);
+            String numberString = chinesePhoneticUtils.changeWordsWithChinesePhonetic(voiceInfo);
+            double number = chinesePhoneticUtils.chineseNumber2Arabic(numberString);
+            Log.i(TAG, "Change => "+ chinesePhoneticUtils.chineseNumber2Arabic(numberString));
             Toast.makeText(mContext, voiceInfo, Toast.LENGTH_LONG).show();
-            EventBus.getDefault().post(new MsgVoiceEvent(RECOGNIZE_FINISH, voiceInfo));
+            EventBus.getDefault().post(new MsgVoiceEvent(RECOGNIZE_FINISH, Double.toString(number)));
         }
         //会话发生错误回调接口
         public void onError(SpeechError error) {
