@@ -114,7 +114,7 @@ public class VoiceRecognizer {
             }
 
             Log.i(TAG, "Recognize => "+ voiceInfo);
-            ChinesePhoneticUtils chinesePhoneticUtils = new ChinesePhoneticUtils(true);
+            ChinesePhoneticUtils chinesePhoneticUtils = new ChinesePhoneticUtils(true, mContext);
             String numberString = chinesePhoneticUtils.changeWordsWithChinesePhonetic(voiceInfo);
             String number = chinesePhoneticUtils.chineseNumber2Arabic(numberString);
             Log.i(TAG, "Change => "+ number);

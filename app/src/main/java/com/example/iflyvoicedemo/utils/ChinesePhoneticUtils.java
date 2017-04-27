@@ -1,7 +1,10 @@
 package com.example.iflyvoicedemo.utils;
 
+import android.content.Context;
 import android.util.Log;
 
+
+import com.example.iflyvoicedemo.bean.NumberPhonetic;
 
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
@@ -9,6 +12,10 @@ import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
 import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 
 
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +27,7 @@ import java.util.Map;
 
 public class ChinesePhoneticUtils {
     private final String TAG = this.getClass().getSimpleName()+"@wumin";
+    private Context mContext;
     String[] englishPhonetic = {
       "EI1", "BI4", "SEI4", "DI4", "YI4", "EFU1", "JI4",
       "EIQI1", "AI4", "JEI4", "KEI4", "EOU1", "EMEN1", "EN1",
@@ -38,14 +46,15 @@ public class ChinesePhoneticUtils {
     String chineseNumberString = "零一二三四五六七八九十百千万点";
     String outCharctor = chineseNumberString;
 
-    Map<String, List<String>> chinesePhonetic = new HashMap<>();
+    List<NumberPhonetic> chinesePhoneticTable = null;
     List<String> numberChinesePhonetic = new ArrayList<>();
     List<String> outChinesePhonetic = new ArrayList<>();
 
     boolean fuzzyMatching = true;
 
-    public ChinesePhoneticUtils(boolean fuzzyMatching) {
+    public ChinesePhoneticUtils(boolean fuzzyMatching, Context context) {
         this.fuzzyMatching = fuzzyMatching;
+        mContext = context;
         initSettings();
     }
 
@@ -65,7 +74,7 @@ public class ChinesePhoneticUtils {
             format.setCaseType(HanyuPinyinCaseType.UPPERCASE);
             format.setToneType(HanyuPinyinToneType.WITH_TONE_NUMBER);
 
-            str = arabicNumberString;
+            str = chineseNumberString;
             for (int i = 0; i < str.length(); i ++) {
                 char c = str.charAt(i);
                 String[] strs = PinyinHelper.toHanyuPinyinStringArray(c, format);
@@ -75,11 +84,21 @@ public class ChinesePhoneticUtils {
             Log.d(TAG, "Phonetic -> " + numberChinesePhonetic.toString());
 
             outChinesePhonetic.addAll(numberChinesePhonetic);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    /*
+     *  @Method changeWordsWithChinesePhonetic
+     *  @Description    Get chinese number with fuzzy matching
+     *  @Param [input]  : the chinese number
+     *  @Return java.lang.String
+     *  @Exception
+     *  @Author Mr.wumin
+     *  @Time 2017/4/25 10:40
+     */
     public String changeWordsWithChinesePhonetic(String input) {
         String output = input;
         try {
@@ -106,9 +125,17 @@ public class ChinesePhoneticUtils {
         return output;
     }
 
+    /*
+     *  @Method changeWordProcessSignal
+     *  @Description    Delete some special charactor, like space
+     *  @Param [input]
+     *  @Return java.lang.String
+     *  @Exception
+     *  @Author Mr.wumin
+     *  @Time 2017/4/25 10:42
+     */
     private String changeWordProcessSignal(String input) {
         String output = input;
-
         output = output.replace("，", "");
         output = output.replace("。", "");
         output = output.replace("-", "");
@@ -117,14 +144,31 @@ public class ChinesePhoneticUtils {
         return output;
     }
 
+    /*
+     *  @Method changeWordProcessEnglish
+     *  @Description    UpperCase the input english charactor
+     *  @Param [input]
+     *  @Return java.lang.String
+     *  @Exception
+     *  @Author Mr.wumin
+     *  @Time 2017/4/25 10:44
+     */
     private String changeWordProcessEnglish(String input) {
         String output = input;
-
         output =output.toUpperCase();
 
         return output;
     }
 
+    /*
+     *  @Method changeOneWord
+     *  @Description    Schedule fuzzy match
+     *  @Param [input]
+     *  @Return java.lang.String
+     *  @Exception
+     *  @Author Mr.wumin
+     *  @Time 2017/4/25 15:45
+     */
     private String changeOneWord(String input) {
         if (chineseNumberString.contains(input) || arabicNumberString.contains(input)) {
             Log.d(TAG, "Number -> " + input);
@@ -141,12 +185,24 @@ public class ChinesePhoneticUtils {
         return input;
 
     }
+
+
+    /*
+     *  @Method changeWord
+     *  @Description    Fuzzy match chinese with chinese phonetic
+     *  @Param [input, phonetics, strs]
+     *  @Return java.lang.String
+     *  @Exception
+     *  @Author Mr.wumin
+     *  @Time 2017/4/25 14:52
+     */
     private String changeWord(String input, List<String> phonetics, String strs) {
         String output = "";
         String str = input.substring(0, 1);
         String strPhonetic = "";
         boolean flag = false;
 
+        /***    Judge the type of input, like english, number or chinese  ***/
         try {
             Log.d(TAG, "BEFORE STR - > " + str);
             if (str.matches("^[A-Z]{1}$")) {
@@ -172,70 +228,94 @@ public class ChinesePhoneticUtils {
                 flag = true;
             }
 
+            /***    Match chinese phonetic   ***/
             if (flag) {
+                /***    Accurate match     ***/
                 int num = phonetics.indexOf(strPhonetic);
                 if (num >= 0) {
                     return strs.substring(num, num+1);
                 } else {
+                    /***    Chinese phonetic fuzzy match    ***/
                     if (fuzzyMatching) {
+                        /***   Match initial consonant   ***/
                         String strPhoneticFuzzy = new String(strPhonetic);
                         strPhoneticFuzzy = replaceHead(strPhoneticFuzzy);
                         boolean flagReplaceHead = (strPhoneticFuzzy == null) ? false: true;
                         if (flagReplaceHead) {
                             num = phonetics.indexOf(strPhoneticFuzzy);
                             if (num >= 0) {
+                                Log.d(TAG, "Match initial consonant...");
                                 return strs.substring(num, num+1);
                             }
                         }
 
+                        /***   Match vowel   ***/
                         strPhoneticFuzzy = new String(strPhonetic);
                         strPhoneticFuzzy = replaceTail(strPhoneticFuzzy);
                         boolean flagReplaceTail = (strPhoneticFuzzy == null) ? false:true;
                         if (flagReplaceTail) {
                             num = phonetics.indexOf(strPhoneticFuzzy);
                             if (num >= 0) {
+                                Log.d(TAG, "Match vowel...");
                                 return strs.substring(num, num+1);
                             }
                         }
 
+                        /***    Match both intial consonant and vowel   ***/
                         if (flagReplaceHead && flagReplaceTail) {
                             strPhoneticFuzzy = replaceHead(strPhoneticFuzzy);
                             num = phonetics.indexOf(strPhoneticFuzzy);
                             if (num >= 0) {
+                                Log.d(TAG, "Match both intial consonant and vowel...");
                                 return strs.substring(num, num+1);
                             }
                         }
 
-                        strPhonetic = strPhonetic.substring(0, strPhonetic.length());
+                        /***    Accurate match when delete the tone     ***/
+                        strPhonetic = strPhonetic.substring(0, strPhonetic.length()-1);
                         strPhoneticFuzzy = new String(strPhonetic);
                         num = findPhonetic(strPhoneticFuzzy, phonetics);
                         if (num >= 0) {
+                            Log.d(TAG, "Accurate match when delete the tone...");
                             return strs.substring(num, num + 1);
                         }
 
+                        /***    Fuzzy match in confused table   ***/
+                        String fuzzy = findPhoneticWithTable(strPhoneticFuzzy);
+                        if(!fuzzy.equals("")) {
+                            Log.d(TAG, "Fuzzy match in confused table when delete the tone...");
+                            return fuzzy;
+                        }
+
+                        /***   Match initial consonant   ***/
                         strPhoneticFuzzy = replaceHead(strPhoneticFuzzy);
                         flagReplaceHead = (strPhoneticFuzzy == null) ? false:true;
                         if (flagReplaceHead) {
                             num = findPhonetic(strPhoneticFuzzy, phonetics);
                             if (num >= 0) {
+                                Log.d(TAG, "Match initial consonant when delete the tone...");
                                 return strs.substring(num, num+1);
                             }
                         }
 
+                        /***   Match vowel   ***/
                         strPhoneticFuzzy = new String(strPhonetic);
                         strPhoneticFuzzy = replaceTail(strPhoneticFuzzy);
                         flagReplaceTail = (strPhoneticFuzzy == null) ? false:true;
                         if (flagReplaceTail) {
                             num = findPhonetic(strPhoneticFuzzy, phonetics);
                             if (num >= 0) {
+                                Log.d(TAG, "Match vowel when delete the tone...");
                                 return strs.substring(num, num+1);
                             }
                         }
 
+                        /***    Match both intial consonant and vowel   ***/
                         if (flagReplaceHead && flagReplaceTail) {
                             strPhoneticFuzzy = replaceHead(strPhoneticFuzzy);
                             num = findPhonetic(strPhoneticFuzzy, phonetics);
                             if (num >= 0) {
+                                Log.d(TAG, "Match both intial consonant and vowel when delete the tone...");
                                 return strs.substring(num, num+1);
                             }
                         }
@@ -251,6 +331,15 @@ public class ChinesePhoneticUtils {
         return output;
     }
 
+    /*
+     *  @Method replaceHead
+     *  @Description    Replace the given phonetic that acts initial consonant with similar phonetic
+     *  @Param [phonetic]
+     *  @Return java.lang.String
+     *  @Exception
+     *  @Author Mr.wumin
+     *  @Time 2017/4/25 15:05
+     */
     private String replaceHead(String phonetic) {
         String out = null;
         if (phonetic.contains("ZH")) {
@@ -277,6 +366,15 @@ public class ChinesePhoneticUtils {
         return out;
     }
 
+    /*
+     *  @Method replaceTail
+     *  @Description    Replace the given phonetic that acts vowel with similar phonetic
+     *  @Param [phonetic]
+     *  @Return java.lang.String
+     *  @Exception
+     *  @Author Mr.wumin
+     *  @Time 2017/4/25 15:04
+     */
     private String replaceTail(String phonetic) {
         String out = null;
         if (phonetic.contains("ANG")) {
@@ -298,6 +396,15 @@ public class ChinesePhoneticUtils {
         return out;
     }
 
+    /*
+     *  @Method findPhonetic
+     *  @Description    Search phonetic in list
+     *  @Param [phonetic, phonetics]
+     *  @Return int : the position of phonetic in list
+     *  @Exception
+     *  @Author Mr.wumin
+     *  @Time 2017/4/25 15:02
+     */
     private int findPhonetic(String phonetic, List<String> phonetics) {
         int num = 0;
         for (String str : phonetics) {
@@ -310,6 +417,35 @@ public class ChinesePhoneticUtils {
         return -1;
     }
 
+    private String findPhoneticWithTable(String phonetic) {
+        Log.d(TAG, "Find phonetic in table -> " + phonetic);
+        String output = "";
+        if (chinesePhoneticTable == null) {
+            chinesePhoneticTable = new ArrayList<>();
+            InputStream inputStream = null;
+            try {
+                inputStream = mContext.getAssets().open("chinese_phonetic_table.xml");
+                chinesePhoneticTable.addAll(CustomUtils.read4XML(inputStream));
+
+                for(NumberPhonetic num : chinesePhoneticTable) {
+                    Log.d(TAG, "CONFUSED NUM -> " + num.toString());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (XmlPullParserException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        for(NumberPhonetic item : chinesePhoneticTable) {
+            if (item.getPhonetics().contains(phonetic)) {
+                output = item.getNumber();
+                break;
+            }
+        }
+        return output;
+    }
     /*
      *  @Method chineseNumber2Arabic
      *  @Description    According to the type of string, change number string to arabic string

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<phonetics>
+    <number name="一">
+        <phonetic>YAO</phonetic>
+    </number>
+    <number name="三">
+        <phonetic>SA</phonetic>
+    </number>
+    <number name="六">
+        <phonetic>LU</phonetic>
+    </number>
+</phonetics>
