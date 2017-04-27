@@ -116,10 +116,10 @@ public class VoiceRecognizer {
             Log.i(TAG, "Recognize => "+ voiceInfo);
             ChinesePhoneticUtils chinesePhoneticUtils = new ChinesePhoneticUtils(true);
             String numberString = chinesePhoneticUtils.changeWordsWithChinesePhonetic(voiceInfo);
-            double number = chinesePhoneticUtils.chineseNumber2Arabic(numberString);
-            Log.i(TAG, "Change => "+ chinesePhoneticUtils.chineseNumber2Arabic(numberString));
-            Toast.makeText(mContext, voiceInfo, Toast.LENGTH_LONG).show();
-            EventBus.getDefault().post(new MsgVoiceEvent(RECOGNIZE_FINISH, Double.toString(number)));
+            String number = chinesePhoneticUtils.chineseNumber2Arabic(numberString);
+            Log.i(TAG, "Change => "+ number);
+            Toast.makeText(mContext, voiceInfo + " -> " + number, Toast.LENGTH_LONG).show();
+            EventBus.getDefault().post(new MsgVoiceEvent(RECOGNIZE_FINISH, number));
         }
         //会话发生错误回调接口
         public void onError(SpeechError error) {

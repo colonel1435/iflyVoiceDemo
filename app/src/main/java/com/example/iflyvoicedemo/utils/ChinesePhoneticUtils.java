@@ -10,7 +10,9 @@ import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Administrator on 2017/4/26.
@@ -24,11 +26,19 @@ public class ChinesePhoneticUtils {
       "OU1", "PI1", "KIU1", "A4", "ESI1", "TI4",
       "YOU4", "WEI4", "DABULIU3", "EKESI1", "WAI4", "ZEI4"
     };
+
+    String[] unitArray = {
+      "十", "百", "千", "万"
+    };
+
+    String arabicArray = "0123456789.";
+    String chineseArray = "零一二三四五六七八九点";
     String englishString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     String arabicNumberString = "0123456789";
     String chineseNumberString = "零一二三四五六七八九十百千万点";
     String outCharctor = chineseNumberString;
 
+    Map<String, List<String>> chinesePhonetic = new HashMap<>();
     List<String> numberChinesePhonetic = new ArrayList<>();
     List<String> outChinesePhonetic = new ArrayList<>();
 
@@ -39,6 +49,15 @@ public class ChinesePhoneticUtils {
         initSettings();
     }
 
+    /*
+     *  @Method initSettings
+     *  @Description    initilize
+     *  @Param []
+     *  @Return void
+     *  @Exception
+     *  @Author Mr.wumin
+     *  @Time 2017/4/27 11:37
+     */
     private void initSettings() {
         try {
             String str;
@@ -52,6 +71,8 @@ public class ChinesePhoneticUtils {
                 String[] strs = PinyinHelper.toHanyuPinyinStringArray(c, format);
                 numberChinesePhonetic.add(strs[0]);
             }
+
+            Log.d(TAG, "Phonetic -> " + numberChinesePhonetic.toString());
 
             outChinesePhonetic.addAll(numberChinesePhonetic);
         } catch (Exception e) {
@@ -103,7 +124,7 @@ public class ChinesePhoneticUtils {
 
         return output;
     }
-    
+
     private String changeOneWord(String input) {
         if (chineseNumberString.contains(input) || arabicNumberString.contains(input)) {
             Log.d(TAG, "Number -> " + input);
@@ -120,7 +141,6 @@ public class ChinesePhoneticUtils {
         return input;
 
     }
-
     private String changeWord(String input, List<String> phonetics, String strs) {
         String output = "";
         String str = input.substring(0, 1);
@@ -148,6 +168,7 @@ public class ChinesePhoneticUtils {
                 String[] vals = PinyinHelper.toHanyuPinyinStringArray(ch, format);
 
                 strPhonetic = vals[0];
+                Log.d(TAG, "CHINESE - > " + str + "CHINESE PHONETIC - > " + strPhonetic);
                 flag = true;
             }
 
@@ -288,65 +309,149 @@ public class ChinesePhoneticUtils {
 
         return -1;
     }
-    /**
-     * chinese 2 arabic number
-     * @author wumin.sunland
-     * @param chineseNumber
-     * @return
+
+    /*
+     *  @Method chineseNumber2Arabic
+     *  @Description    According to the type of string, change number string to arabic string
+     *                  type : true -> the string contains count unit, like ten、hundred and so on,
+     *                         Using chineseNumber2ArabicWithFull() to get number.
+     *                          false -> the string is spell in short without count unit.
+     *                         Using chineseNumber2ArabicWithShort() to get number.
+     *  @Param [numberString]
+     *  @Return java.lang.String
+     *  @Exception
+     *  @Author Mr.wumin
+     *  @Time 2017/4/25 9:05
      */
+    public String chineseNumber2Arabic(String numberString) {
+        String output;
+        boolean type = false;
+        /***   Judge that whether there is count unit or not in numberString ***/
+        for (int i = 0; i < unitArray.length; i++) {
+            if (numberString.contains(unitArray[i])) {
+                type = true;
+                break;
+            }
+        }
+
+        if (type){
+            output = chineseNumber2ArabicWithFull(numberString);
+        } else {
+            output = chineseNumber2ArabicWithShort(numberString);
+        }
+
+        return output;
+    }
+
+    /*
+     *  @Method chineseNumber2ArabicWithShort
+     *  @Description    Change chinese number string to arabic number ,
+     *                  Replace chinese char with arabic in order
+     *  @Param [numberString]
+     *  @Return java.lang.String
+     *  @Exception
+     *  @Author Mr.wumin
+     *  @Time 2017/4/25 9:10
+     */
+    public String chineseNumber2ArabicWithShort(String numberString) {
+        Log.d(TAG, "Start chineseNumber2ArabicWithShort...");
+        String output = "";
+        char ch;
+        int index;
+        int size = numberString.length();
+        for (int i = 0; i < size; i++) {
+            ch = numberString.charAt(i);
+            index = chineseArray.indexOf(ch);
+            if (index != -1){
+                output += arabicArray.charAt(index);
+            }
+            Log.d(TAG, "Char -> " + ch + " INDEX -> " + index + " OUTPUT -> " + output);
+        }
+
+        return output;
+    }
+
+    /*
+    *  @Method chineseNumber2ArabicWithFull
+    *  @Description     Change chinese number string to arabic number ,
+    *                   With decimal multiplication
+    *  @Param [chineseNumber]
+    *  @Return java.lang.String
+    *  @Exception
+    *  @Author Mr.wumin
+    *  @Time 2017/4/25 9:12
+    */
     @SuppressWarnings("unused")
-    public int chineseNumber2Arabic(String chineseNumber){
-        int result = 0;
-        int temp = 1;//存放一个单位的数字如：十万
-        int count = 0;//判断是否有chArr
-        char[] cnArr = new char[]{'一','二','三','四','五','六','七','八','九'};
-        char[] chArr = new char[]{'十','百','千','万','亿'};
-        for (int i = 0; i < chineseNumber.length(); i++) {
-            boolean b = true;//判断是否是chArr
-            char c = chineseNumber.charAt(i);
-            for (int j = 0; j < cnArr.length; j++) {//非单位，即数字
+    public String chineseNumber2ArabicWithFull(String chineseNumber){
+
+        Log.d(TAG, "Start chineseNumber2ArabicWithFull...");
+        double output = 0;
+        double number = 1; // single number content
+        boolean count = false;  //whether there is previous unit or not to handle
+        char[] cnArr = new char[]{'零','一','二','三','四','五','六','七','八','九'};
+        char[] chArr = new char[]{'个','十','百','千','万'};
+        char dot = '点';
+        String integerStr = chineseNumber;
+        String decimalStr = "";
+        /***    Seperate integer and decimal    ***/
+        if (chineseNumber.indexOf(String.valueOf(dot)) != -1) {
+            String[] numbers = chineseNumber.split("[点]");
+            integerStr = numbers[0];
+            decimalStr = numbers[1];
+            Log.d(TAG, "Integer -> " + integerStr + " Decimal - > " + decimalStr);
+        }
+
+        /***    Handle integer part  ***/
+        for (int i = 0; i < integerStr.length(); i++) {
+            boolean unit = true;// whether is unit or number, true : unit ; false : number
+            char c = integerStr.charAt(i);
+
+            /***   Search char's position  ***/
+            for (int j = 0; j < cnArr.length; j++) {
                 if (c == cnArr[j]) {
-                    if(0 != count){//添加下一个单位之前，先把上一个单位值添加到结果中
-                        result += temp;
-                        temp = 1;
-                        count = 0;
+                    /***    Add previous unit     ***/
+                    if(count){
+                        output += number;
+                        count = false;
                     }
-                    // 下标+1，就是对应的值
-                    temp = j + 1;
-                    b = false;
+                    /***    The right number value is j   ***/
+                    number = j;
+                    unit = false;
                     break;
                 }
             }
-            if(b){//单位{'十','百','千','万','亿'}
+            /***    Multiple unit  to number  ***/
+            if(unit){
                 for (int j = 0; j < chArr.length; j++) {
                     if (c == chArr[j]) {
-                        switch (j) {
-                            case 0:
-                                temp *= 10;
-                                break;
-                            case 1:
-                                temp *= 100;
-                                break;
-                            case 2:
-                                temp *= 1000;
-                                break;
-                            case 3:
-                                temp *= 10000;
-                                break;
-                            case 4:
-                                temp *= 100000000;
-                                break;
-                            default:
-                                break;
-                        }
-                        count++;
+                        number *= (Math.pow(10, j));
+                        count = true;
                     }
                 }
             }
-            if (i == chineseNumber.length() - 1) {//遍历到最后一个字符
-                result += temp;
+            /***    Stop it when it's the last char     ***/
+            if (i == integerStr.length() - 1) {
+                output += number;
+                number = 0.0;
             }
         }
-        return result;
+
+        /***    Handle decimal part   ***/
+        for(int k = 0; k < decimalStr.length(); k++) {
+            for (int j = 0; j < cnArr.length; j++) {
+                char ch = decimalStr.charAt(k);
+                if (ch == cnArr[j]) {
+                    /***    The right number value is j*Math.pow(10, -(j+1))   ***/
+                    number += (double) j / Math.pow(10, k+1);
+                    Log.d(TAG, "ch -> " + ch + " number -> " + (double) j / Math.pow(10, k+1) + " sum -> " + number);
+                    break;
+                }
+            }
+            /***    Stop it when it's the last char     ***/
+            if (k == decimalStr.length() - 1) {
+                output += number;
+            }
+        }
+        return Double.toString(output);
     }
 }
