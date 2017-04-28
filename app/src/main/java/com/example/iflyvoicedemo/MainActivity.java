@@ -129,6 +129,8 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case VoiceRecognizer.RECOGNIZE_FINISH:
                 mVoiceWindows.dismiss();
+                if (event.getMsg())
+                mVSynthesizer.speakMsg(getString(R.string.synthesier_msg) + event.getMsg());
                 break;
             default:
                 mVoiceWindows.dismiss();

@@ -136,6 +136,7 @@ public class VoiceRecognizer {
                 default:
                     break;
             }
+            Log.i(TAG, "onError => "+ errCode);
             EventBus.getDefault().post(new MsgVoiceEvent(errCode, errType));
         }
 

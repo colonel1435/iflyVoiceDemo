@@ -62,10 +62,10 @@ public class VoiceSynthesizer {
     };
     public void startSpeechSynthesizer() {
         mTts= SpeechSynthesizer.createSynthesizer(mContext, null);
-        mTts.setParameter(SpeechConstant.VOICE_NAME, "xiaoqi");//设置发音人
+        mTts.setParameter(SpeechConstant.VOICE_NAME, "xiaorong");//设置发音人
         mTts.setParameter(SpeechConstant.SPEED, "50");//设置语速
         mTts.setParameter(SpeechConstant.VOLUME, "80");//设置音量，范围0~100
-        mTts.setParameter(SpeechConstant.ENGINE_TYPE, SpeechConstant.TYPE_CLOUD); //设置云端
+        mTts.setParameter(SpeechConstant.ENGINE_TYPE, SpeechConstant.TYPE_LOCAL); //设置本地
     }
     public void speakMsg(String msg) {
         mTts.startSpeaking(msg, mSynListener);

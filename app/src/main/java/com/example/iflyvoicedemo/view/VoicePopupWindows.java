@@ -64,13 +64,15 @@ public class VoicePopupWindows extends PopupWindow {
 
     public void showProgress() {
         mSpeakLayout.setVisibility(View.INVISIBLE);
+        mSpeakErrLayout.setVisibility(View.INVISIBLE);
         mProgressLayout.setVisibility(View.VISIBLE);
     }
 
     public void showMsg(String msg, int iconId) {
         mMsgText.setText(msg);
         mMsgImage.setImageResource(iconId);
-        mProgressLayout.setVisibility(View.GONE);
+        mSpeakLayout.setVisibility(View.INVISIBLE);
+        mProgressLayout.setVisibility(View.INVISIBLE);
         mSpeakErrLayout.setVisibility(View.VISIBLE);
     }
 
