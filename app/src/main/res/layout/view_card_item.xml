@@ -6,9 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
-    android:layout_margin="15dp"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
     card_view:cardBackgroundColor="@color/colorSilver"
     card_view:cardCornerRadius="10dp"
     card_view:cardElevation="5dp"
@@ -20,14 +17,34 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/tv_ref"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/default_textview_padding"
+            android:gravity="center"
+            android:text="识别文本"
+            android:textColor="@color/colorGrey" />
+        <TextView
             android:id="@+id/tv_ref_text"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:padding="@dimen/default_textview_padding"
             android:text="afdjfaljdf"
-            android:textColor="@color/colorBlack" />
+            android:textColor="@color/colorWhite" />
 
+        <com.example.iflyvoicedemo.view.DashLineView
+            android:layout_width="match_parent"
+            android:layout_height="20dp" />
+
+        <TextView
+            android:id="@+id/tv_recog"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/default_textview_padding"
+            android:gravity="center"
+            android:text="识别结果"
+            android:textColor="@color/colorGrey" />
         <TextView
             android:id="@+id/tv_recog_text"
             android:layout_width="match_parent"
@@ -35,8 +52,18 @@
             android:layout_weight="1"
             android:padding="@dimen/default_textview_padding"
             android:text="afdjfaljdf"
-            android:textColor="@color/colorBlack" />
+            android:textColor="@color/colorWhite" />
 
+        <com.example.iflyvoicedemo.view.DashLineView
+            android:layout_width="match_parent"
+            android:layout_height="20dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="2dip"
+            android:background="@drawable/shape_dash_line"
+            android:layerType="software"
+            android:orientation="horizontal" />
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -48,7 +75,7 @@
                 android:layout_weight="1"
                 android:padding="@dimen/default_textview_padding"
                 android:text="afdjfaljdf"
-                android:textColor="@color/colorBlack" />
+                android:textColor="@color/colorWhite" />
             <TextView
                 android:id="@+id/tv_accuracy"
                 android:layout_width="0dp"
@@ -57,7 +84,7 @@
                 android:visibility="gone"
                 android:padding="@dimen/default_textview_padding"
                 android:text="afdjfaljdf"
-                android:textColor="@color/colorBlack" />
+                android:textColor="@color/colorWhite" />
             <TextView
                 android:id="@+id/tv_similarity"
                 android:layout_width="0dp"
@@ -65,7 +92,7 @@
                 android:layout_weight="1"
                 android:padding="@dimen/default_textview_padding"
                 android:text="afdjfaljdf"
-                android:textColor="@color/colorBlack" />
+                android:textColor="@color/colorWhite" />
 
         </LinearLayout>
 

@@ -65,8 +65,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        toolbar.setTitle(getString(R.string.app_title));
-        setSupportActionBar(toolbar);
 
         EventBus.getDefault().register(this);
         mContext = this;
@@ -89,6 +87,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initView() {
+        toolbar.setTitle(getString(R.string.app_title));
+        setSupportActionBar(toolbar);
+
         cardSwitchListener = new CardSlidePanel.CardSwitchListener() {
 
             @Override
@@ -190,8 +191,8 @@ public class MainActivity extends AppCompatActivity {
             case VoiceRecognizer.RECOGNIZE_FINISH:
                 mVoiceWindows.dismiss();
                 if (!event.getMsg().equals("")) {
-                    mVSynthesizer.speakMsg(getString(R.string.synthesier_msg) + event.getMsg());
-//                    tvOnlineMsg.setText(event.getMsg());
+//                    mVSynthesizer.speakMsg(getString(R.string.synthesier_msg) + event.getMsg());
+                    checkResult(event.getMsg());
                 }
                 break;
             case VoiceRecognizer.OFFLINE_START_VOICE:
