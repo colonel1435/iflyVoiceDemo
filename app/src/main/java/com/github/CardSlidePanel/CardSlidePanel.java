@@ -543,7 +543,7 @@ public class CardSlidePanel extends ViewGroup {
                     CardItemView itemView = viewList.get(i);
                     if (i < adapter.getCount()) {
                         if (itemView.getVisibility() == View.VISIBLE) {
-                            continue;
+//                            continue;
                         } else if (i == 0) {
                             if (isShowing > 0) {
                                 isShowing++;
