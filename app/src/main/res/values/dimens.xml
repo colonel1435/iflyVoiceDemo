@@ -11,4 +11,6 @@
     <dimen name="item_margin_left">80dp</dimen>
     <dimen name="item_margin_right">80dp</dimen>
     <dimen name="msg_title_size">24sp</dimen>
+    <dimen name="default_textview_padding">5dp</dimen>
+    <dimen name="default_image_button_size">64dp</dimen>
 </resources>

@@ -1,11 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimary">#337ab2</color>
+    <color name="colorPrimaryDark">#337ab2</color>
     <color name="colorAccent">#FF4081</color>
-    <color name="colorDark">#565a5d</color>
-    <color name="colorDarkSlateGray">#313435</color>
     <color name="colorBlack">#000000</color>
     <color name="colorWhite">#ffffff</color>
-    <color name="colorDarkBlue">#198dd6</color>
+    <color name="colorRed">#ff0000</color>
+    <color name="colorforestGreen">#19AD17</color>
+    <color name="colorDarkGreen">#00a000</color>
+    <color name="colorGrassGreen">#67C100</color>
+    <color name="colorOceanBlue">#0D9A9A</color>
+    <color name="colorDarkBlue">#337ab2</color>
+    <color name="colorLightBlue">#77B3D7</color>
+    <color name="colorYellow">#EACC20</color>
+    <color name="colorDodgerBlue">#3DA8E0</color>
+    <color name="colorMiddleBlue">#04AEDA</color>
+    <color name="colorLightGray">#999999</color>
+    <color name="colorDardGray">#C0C4C7</color>
+    <color name="colorSilver">#bdc3c7</color>
+    <color name="colorCloud">#ecf0f1</color>
+    <color name="orange">#fd7f52</color>
+    <color name="colorOrange">#F5b45d</color>
+    <color name="dark">#f1f1ec</color>
+    <color name="deep_dark">#dadad5</color>
+    <color name="colorLavader">#EBEBEB</color>
+    <color name="colorVirb">#06afd8</color>
+    <color name="colorTweet">#6f6f6f</color>
+    <color name="light_gray">#fff5f5f5</color>
+    <color name="colorDarkSlateGray">#313435</color>
+    <color name="colorLightGreen">#A5DC86</color>
+    <color name="md_grey_800">#ff424242</color>
+    <color name="md_blue_grey_800">#ff37474f</color>
+    <color name="md_deep_teal_300">#ff4db6ac</color>
+    <color name="md_deep_teal_500">#ff009688</color>
+
+    <color name="colorBgGray">#e0e0e0</color>
+    <color name="colorIvory">#fffff0</color>
+    <color name="colorLightGrey">#d3d3d3</color>
+    <color name="colorGrey">#808080</color>
+    <color name="white_full">#ffffffff</color>
+    <color name="white_dark">#ffdcdcdc</color>
+    <color name="colorControlHighlight">#4dFF4081</color>
+    <color name="translucent">#66ffffff</color>
+    <color name="transparent">#00000000</color>
+    <color name="colorAccent_translucent">#66FF4081</color>
+    <color name="md_deep_teal_300_translucent">#664db6ac</color>
+    <color name="colorLightCoral">#F37B7A</color>
+
+    <color name="colorSeaGreen">#2B8537</color>
+    <color name="colorDarkCyan">#1D9C7E</color>
+    <color name="colorLightSeaGreen">#22B59a</color>
+    <color name="colorMediumTurquoise">#4CD4BC</color>
+    <color name="colorDarkTurquoise">#1FE3BF</color>
+    <color name="colorSlateGray">#04576B</color>
+    <color name="colorTeal">#227580</color>
+    <color name="colorSteelBlue">#4699A3</color>
+    <color name="colorMediumAquamaine">#40BACA</color>
+    <color name="colorSkyBlue">#88B8CC</color>
+    <color name="colorMaroon">#611023</color>
+    <color name="colorBrown">#991924</color>
+    <color name="colorChocolate">#C24924</color>
+    <color name="colorCoral">#E67B63</color>
+    <color name="colorRosyBrown">#AE7D7D</color>
+    <color name="colorDarkSlateBlue">#484570</color>
+    <color name="colorSlateBlue">#68638C</color>
+    <color name="colorLightSlateBlue">#8B85A8</color>
+
+    <color name="colorMenuBgGray">#efefef</color>
+    <color name="colorMenuGray">#e7e4e4</color>
+    <color name="colorMenuDeepGray">#afaeae</color>
+    <color name="colorMenuDarkGray">#636262</color>
+    <color name="colorLightWhite">#e2e1e1</color>
+    <color name="colorLightBlack">#fd383838</color>
+    <color name="colorWhiteSmoke">#F0F1F3</color>
+
+    <color name="color_best">#4CAF50</color>
+    <color name="color_good">#FFC107</color>
+    <color name="color_bad">#E53935</color>
+
+    <color name="indicator_1">#55B3C2</color>
+    <color name="indicator_2">#FDBC7D</color>
 </resources>

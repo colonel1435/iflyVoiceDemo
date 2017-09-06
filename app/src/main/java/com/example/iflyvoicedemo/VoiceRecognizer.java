@@ -9,7 +9,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.iflyvoicedemo.bean.MsgVoiceEvent;
-import com.example.iflyvoicedemo.utils.ChinesePhoneticUtils;
 import com.iflytek.cloud.ErrorCode;
 import com.iflytek.cloud.InitListener;
 import com.iflytek.cloud.LexiconListener;
@@ -23,8 +22,6 @@ import com.iflytek.cloud.ui.RecognizerDialog;
 import com.iflytek.cloud.ui.RecognizerDialogListener;
 
 import org.greenrobot.eventbus.EventBus;
-
-import java.util.logging.MemoryHandler;
 
 /**
  * Created by Administrator on 2016/12/5.
@@ -50,9 +47,18 @@ public class VoiceRecognizer {
     public static final int SPEAK_NULL = 7;
     public static final int NET_ERROR = 8;
 
-    public VoiceRecognizer(Activity activity, Handler handler) {
+    public static final int OFFLINE_START_VOICE = 10;
+    public static final int OFFLINE_START_SPEAK = 11;
+    public static final int OFFLINE_STOP_SPEAK = 12;
+    public static final int OFFLINE_START_RECOGNIZE = 13;
+    public static final int OFFLINE_STOP_RECOGNIZE = 14;
+    public static final int OFFLINE_RECOGNIZE_ERROR = 15;
+    public static final int OFFLINE_RECOGNIZE_FINISH = 16;
+    public static final int OFFLINE_SPEAK_NULL = 17;
+    public static final int OFFLINE_NET_ERROR = 18;
+
+    public VoiceRecognizer(Activity activity) {
         mContext = activity;
-        mHandler = handler;
         mInstaller = new ApkInstaller(activity);
         mIat= SpeechRecognizer.createRecognizer(mContext, mInitListener);
     }
@@ -65,6 +71,7 @@ public class VoiceRecognizer {
             if (voiceInfo.compareTo("last") == 0)
                 return;
             Toast.makeText(mContext, voiceInfo, Toast.LENGTH_LONG).show();
+            EventBus.getDefault().post(new MsgVoiceEvent(RECOGNIZE_FINISH, voiceInfo));
         }
 
         @Override
@@ -89,7 +96,6 @@ public class VoiceRecognizer {
         recognizerDialog.setParameter(SpeechConstant.ACCENT, "mandarin");
         recognizerDialog.setParameter(SpeechConstant.LANGUAGE, "zh_cn");
         recognizerDialog.setParameter(SpeechConstant.SAMPLE_RATE, "16000");
-        //mAsr.buildGrammar("abnf", mCloudGrammar, grammarListener);
         recognizerDialog.setListener(mRecognizeListener);
         recognizerDialog.show();
     }
@@ -114,24 +120,23 @@ public class VoiceRecognizer {
             }
 
             Log.i(TAG, "Recognize => "+ voiceInfo);
-            ChinesePhoneticUtils chinesePhoneticUtils = new ChinesePhoneticUtils(true, mContext);
-            String numberString = chinesePhoneticUtils.changeWordsWithChinesePhonetic(voiceInfo);
-            String number = chinesePhoneticUtils.chineseNumber2Arabic(numberString);
-            Log.i(TAG, "Change => "+ number);
-            Toast.makeText(mContext, voiceInfo + " -> " + number, Toast.LENGTH_LONG).show();
-            EventBus.getDefault().post(new MsgVoiceEvent(RECOGNIZE_FINISH, number));
+//            ChinesePhoneticUtils chinesePhoneticUtils = new ChinesePhoneticUtils(true, mContext);
+//            String numberString = chinesePhoneticUtils.changeWordsWithChinesePhonetic(voiceInfo);
+//            String number = chinesePhoneticUtils.chineseNumber2Arabic(numberString);
+//            Log.i(TAG, "Change => "+ number);
+            Toast.makeText(mContext, voiceInfo + " -> " + voiceInfo, Toast.LENGTH_LONG).show();
+            EventBus.getDefault().post(new MsgVoiceEvent(OFFLINE_RECOGNIZE_FINISH, voiceInfo));
         }
-        //会话发生错误回调接口
         public void onError(SpeechError error) {
-            error.getPlainDescription(true); //获取错误码描述
+            error.getPlainDescription(true);
             int errCode = error.getErrorCode();
-            int errType = RECOGNIZE_ERROR;
+            int errType = OFFLINE_RECOGNIZE_ERROR;
             switch (errCode) {
                 case 10118:
-                    errType = SPEAK_NULL;
+                    errType = OFFLINE_SPEAK_NULL;
                     break;
                 case 20001:
-                    errType = NET_ERROR;
+                    errType = OFFLINE_NET_ERROR;
                     break;
                 default:
                     break;
@@ -145,18 +150,14 @@ public class VoiceRecognizer {
 
         }
 
-        //开始录音
         public void onBeginOfSpeech() {
             Log.i(TAG, "onBeginOfSpeech...");
         }
-        //音量值0~30
         public void onVolumeChanged(int volume){}
-        //结束录音
         public void onEndOfSpeech() {
             Log.i(TAG, "onEndOfSpeech...");
-            mHandler.sendEmptyMessage(START_RECOGNIZE);
+            EventBus.getDefault().post(new MsgVoiceEvent(OFFLINE_START_RECOGNIZE, ""));
         }
-        //扩展用接口
         public void onEvent(int eventType, int arg1, int arg2, Bundle obj) {}
     };
     public void startSpeechRecognizer() {
@@ -181,7 +182,7 @@ public class VoiceRecognizer {
         setParam();
         Log.i(TAG, "startSpeechRecognizer...");
         mIat.startListening(mRecogListener);
-        EventBus.getDefault().post(new MsgVoiceEvent(START_VOICE));
+        EventBus.getDefault().post(new MsgVoiceEvent(OFFLINE_START_VOICE));
     }
 
     public void stopSpeechRecognizer() {
@@ -192,9 +193,7 @@ public class VoiceRecognizer {
         }
         mIat.cancel();
     }
-    /**
-     * 上传联系人/词表监听器。
-     */
+
     private LexiconListener mLexiconListener = new LexiconListener() {
         @Override
         public void onLexiconUpdated(String lexiconId, SpeechError error) {
@@ -245,7 +244,7 @@ public class VoiceRecognizer {
         mIat.setParameter(SpeechConstant.VAD_EOS, "1000");
 
         // 设置标点符号,设置为"0"返回结果无标点,设置为"1"返回结果有标点
-        mIat.setParameter(SpeechConstant.ASR_PTT, "0");
+        mIat.setParameter(SpeechConstant.ASR_PTT, "1");
 //
 //        // 设置音频保存路径，保存音频格式支持pcm、wav，设置路径为sd卡请注意WRITE_EXTERNAL_STORAGE权限
 //        // 注：AUDIO_FORMAT参数语记需要更新版本才能生效

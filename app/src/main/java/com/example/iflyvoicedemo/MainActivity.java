@@ -1,91 +1,151 @@
 package com.example.iflyvoicedemo;
 
-import android.app.Activity;
 import android.content.Context;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.iflyvoicedemo.bean.MsgVoiceEvent;
+import com.example.iflyvoicedemo.utils.ColorUtils;
+import com.example.iflyvoicedemo.utils.StringUtils;
+import com.example.iflyvoicedemo.utils.XmlUtils;
 import com.example.iflyvoicedemo.view.VoicePopupWindows;
+import com.github.CardSlidePanel.CardAdapter;
+import com.github.CardSlidePanel.CardDataItem;
+import com.github.CardSlidePanel.CardSlidePanel;
+import com.github.CardSlidePanel.CardViewHolder;
 import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechUtility;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "wumin";
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+    TextView tvOfflineMsg;
+    @BindView(R.id.slide_panel)
+    CardSlidePanel slidePanel;
+    @BindView(R.id.iv_refresh)
+    ImageView ivRefresh;
+    @BindView(R.id.iv_speak)
+    ImageView ivSpeak;
     private TextView mVoiceText = null;
     private VoiceSynthesizer mVSynthesizer;
     private VoiceRecognizer mVRecognizer;
     private VoiceWakeup mVWakeup;
     private Toast mToast;
     private Context mContext = null;
-    private ProgressBar mProgressBar;
-    private PopupWindow mPopupWindows;
-    private FrameLayout mProgressLayout;
-    private LinearLayout mSpeakLayout;
-    private LinearLayout mSpeakErrLayout;
-    private TextView mMsgText;
-    private ImageView mMsgImage;
     private VoicePopupWindows mVoiceWindows;
+    private CardSlidePanel.CardSwitchListener cardSwitchListener;
+    private List<CardDataItem> mDatas;
+    private CardAdapter mCardAdapter;
+    private int curPosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        ButterKnife.bind(this);
+        toolbar.setTitle(getString(R.string.app_title));
         setSupportActionBar(toolbar);
 
         EventBus.getDefault().register(this);
         mContext = this;
+
+        initData();
+        initView();
+    }
+
+    private void initData() {
+        mDatas = new ArrayList<>();
+        InputStream inputStream = null;
+        try {
+            inputStream = getAssets().open("pre-shift-meeting.xml");
+            mDatas.addAll(XmlUtils.parseCardData(inputStream));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initView() {
+        cardSwitchListener = new CardSlidePanel.CardSwitchListener() {
+
+            @Override
+            public void onShow(int index) {
+                Log.d("Card", "正在显示-" + mDatas.get(index).getRefText());
+                curPosition = index;
+            }
+
+            @Override
+            public void onCardVanish(int index, int type) {
+                Log.d("Card", "正在消失-" + mDatas.get(index).getRefText() + " 消失type=" + type);
+//                CardDataItem item = mDatas.get(index);
+//                mDatas.add(item);
+//                mCardAdapter.notifyDataSetChanged();
+            }
+        };
+        slidePanel.setCardSwitchListener(cardSwitchListener);
+        mCardAdapter = new CardAdapter() {
+            @Override
+            public int getLayoutId() {
+                return R.layout.view_card_item;
+            }
+
+            @Override
+            public int getCount() {
+                return mDatas.size();
+            }
+
+            @Override
+            public void bindView(View view, int index) {
+                Object tag = view.getTag();
+                CardViewHolder viewHolder;
+                if (null != tag) {
+                    viewHolder = (CardViewHolder) tag;
+                } else {
+                    viewHolder = new CardViewHolder(view);
+                    view.setTag(viewHolder);
+                }
+
+                CardDataItem item = mDatas.get(index);
+                item.setColor(ColorUtils.getRandomColor(mContext));
+                viewHolder.bindData(item);
+            }
+        };
+
+        slidePanel.setAdapter(mCardAdapter);
+
         mToast = Toast.makeText(this, "", Toast.LENGTH_SHORT);
-        mVoiceText = (TextView) findViewById(R.id.tv_voice_info);
         SpeechUtility.createUtility(this, SpeechConstant.APPID + "=" + getString(R.string.appid));
 
         mVSynthesizer = new VoiceSynthesizer(MainActivity.this);
         mVSynthesizer.startSpeechSynthesizer();
 
-        mVRecognizer = new VoiceRecognizer(this, mHandler);
+        mVRecognizer = new VoiceRecognizer(this);
 
         mVWakeup = new VoiceWakeup(this);
         mVWakeup.startWakeup();
-
-
-        mProgressLayout = (FrameLayout)findViewById(R.id.fl_progressbar);
-        mSpeakLayout = (LinearLayout)findViewById(R.id.ll_speak_image);
-        mProgressBar = (ProgressBar) findViewById(R.id.pbar_voice);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.i(TAG, "start voice");
-                mVRecognizer.startSpeechRecognizer();
-//                mVRecognizer.showVoiceRecognizeDialog();
-//                mVSynthesizer.speakMsg("欢迎使用小七语音助手");
-
-            }
-        });
     }
 
     public void startVoice(View view) {
@@ -104,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
         mVRecognizer.showVoiceRecognizeDialog();
     }
 
-    @Subscribe(threadMode=ThreadMode.MAIN)
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onVoiceHandle(MsgVoiceEvent event) {
         int type = event.getType();
         String msg;
@@ -116,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
                 mVoiceWindows.showProgress();
                 break;
             case VoiceRecognizer.RECOGNIZE_ERROR:
-                msg = getString(R.string.recognize_err) + getString(R.string.err_code) + event.getErrCode() +")";
+                msg = getString(R.string.recognize_err) + getString(R.string.err_code) + event.getErrCode() + ")";
                 mVoiceWindows.showMsg(msg, R.drawable.warning);
                 break;
             case VoiceRecognizer.SPEAK_NULL:
@@ -129,8 +189,35 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case VoiceRecognizer.RECOGNIZE_FINISH:
                 mVoiceWindows.dismiss();
-                if (event.getMsg())
-                mVSynthesizer.speakMsg(getString(R.string.synthesier_msg) + event.getMsg());
+                if (!event.getMsg().equals("")) {
+                    mVSynthesizer.speakMsg(getString(R.string.synthesier_msg) + event.getMsg());
+//                    tvOnlineMsg.setText(event.getMsg());
+                }
+                break;
+            case VoiceRecognizer.OFFLINE_START_VOICE:
+                startVoice(getWindow().getDecorView());
+                break;
+            case VoiceRecognizer.OFFLINE_START_RECOGNIZE:
+                mVoiceWindows.showProgress();
+                break;
+            case VoiceRecognizer.OFFLINE_RECOGNIZE_ERROR:
+                msg = getString(R.string.recognize_err) + getString(R.string.err_code) + event.getErrCode() + ")";
+                mVoiceWindows.showMsg(msg, R.drawable.warning);
+                break;
+            case VoiceRecognizer.OFFLINE_SPEAK_NULL:
+                msg = getString(R.string.speak_null);
+                mVoiceWindows.showMsg(msg, R.drawable.warning);
+                break;
+            case VoiceRecognizer.OFFLINE_NET_ERROR:
+                msg = getString(R.string.net_err);
+                mVoiceWindows.showMsg(msg, R.drawable.warning);
+                break;
+            case VoiceRecognizer.OFFLINE_RECOGNIZE_FINISH:
+                mVoiceWindows.dismiss();
+                if (!event.getMsg().equals("")) {
+//                    mVSynthesizer.speakMsg(getString(R.string.synthesier_msg) + event.getMsg());
+                    checkResult(event.getMsg());
+                }
                 break;
             default:
                 mVoiceWindows.dismiss();
@@ -138,40 +225,40 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            int id = msg.what;
-            switch (id) {
-                case VoiceRecognizer.START_VOICE:
-                    startVoice(getWindow().getDecorView());
-                    break;
-                case VoiceRecognizer.START_RECOGNIZE:
-                    mVoiceWindows.showProgress();
-                    break;
-                case VoiceRecognizer.RECOGNIZE_ERROR:
-                    mVoiceWindows.showMsg(getString(R.string.recognize_err), R.drawable.warning);
-                    break;
-                case VoiceRecognizer.SPEAK_NULL:
-                    mVoiceWindows.showMsg(getString(R.string.speak_null), R.drawable.warning);
-                    break;
-                case VoiceRecognizer.NET_ERROR:
-                    mVoiceWindows.showMsg(getString(R.string.net_err), R.drawable.warning);
-                    break;
-                case VoiceRecognizer.RECOGNIZE_FINISH:
-                    mVoiceWindows.dismiss();
-                    break;
-                default:
-                    mVoiceWindows.dismiss();
-                    break;
-            }
-        }
-    };
+    private void checkResult(String result) {
+        CardDataItem item = mDatas.get(curPosition);
+        item.setRecogText(result);
+        String refText = item.getRefText();
+        int sum = refText.length();
+        int error = StringUtils.levenshteinCompare(result, refText);
+        float similarity = StringUtils.getSimilarityRatio(result, refText);
+        item.setSum(sum);
+        item.setSimilarity(similarity);
+        item.setError(error);
+        mCardAdapter.notifyDataSetChanged();
+
+    }
+
     @Override
     protected void onDestroy() {
-        Log.i(TAG,"Stop wakeupListener");
+        Log.i(TAG, "Stop wakeupListener");
         mVWakeup.stopWakeup();
         EventBus.getDefault().unregister(this);
         super.onDestroy();
     }
+
+    @OnClick({R.id.iv_refresh, R.id.iv_speak})
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
+            case R.id.iv_refresh:
+                mVRecognizer.showVoiceRecognizeDialog();
+                break;
+            case R.id.iv_speak:
+                mVRecognizer.startSpeechRecognizer();
+//                mVRecognizer.showVoiceRecognizeDialog();
+//                mVSynthesizer.speakMsg("欢迎使用小七语音助手");
+                break;
+        }
+    }
+
 }
