@@ -31,6 +31,7 @@
                 android:textColor="@color/colorDarkBlue"/>
 
             <ImageView
+                android:id="@+id/iv_voice_list"
                 android:layout_marginTop="@dimen/item_margin_top"
                 android:layout_width="@dimen/progress_bar_width"
                 android:layout_height="@dimen/progress_bar_width"

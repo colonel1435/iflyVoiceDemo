@@ -205,17 +205,6 @@ public class VoiceRecognizer {
         }
     };
 
-    public void upload_userword() {
-        String contents = VoiceUtils.readFile(mContext, "userwords","utf-8");
-        // 指定引擎类型
-        mIat.setParameter(SpeechConstant.ENGINE_TYPE, SpeechConstant.TYPE_CLOUD);
-        // 置编码类型
-        mIat.setParameter(SpeechConstant.TEXT_ENCODING, "utf-8");
-        int ret = mIat.updateLexicon("userword", contents, mLexiconListener);
-        if (ret != ErrorCode.SUCCESS)
-            Toast.makeText(mContext, "上传热词失败,错误码：" + ret, Toast.LENGTH_LONG).show();
-    }
-
     /**
      * set params
      *

@@ -2,6 +2,7 @@ package com.example.iflyvoicedemo.view;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.drawable.Animatable;
 import android.graphics.drawable.ColorDrawable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -28,6 +29,8 @@ public class VoicePopupWindows extends PopupWindow {
     private TextView mMsgText;
     private ImageView mMsgImage;
     private OnDismissListener mDismissListener;
+    private ImageView mListeningImage;
+
 
     public VoicePopupWindows(Context context) {
         super(context);
@@ -42,6 +45,8 @@ public class VoicePopupWindows extends PopupWindow {
         mSpeakErrLayout = (LinearLayout)popupView.findViewById(R.id.ll_speak_err);
         mMsgText = (TextView)popupView.findViewById(R.id.tv_msg_text);
         mMsgImage = (ImageView)popupView.findViewById(R.id.iv_msg_image);
+        mListeningImage = (ImageView) popupView.findViewById(R.id.iv_voice_list);
+        ((Animatable) mListeningImage.getDrawable()).start();
 
         this.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
         this.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);

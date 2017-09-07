@@ -1,6 +1,7 @@
 package com.example.iflyvoicedemo;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -12,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.iflyvoicedemo.bean.MsgVoiceEvent;
+import com.example.iflyvoicedemo.bean.VoiceResult;
 import com.example.iflyvoicedemo.utils.ColorUtils;
 import com.example.iflyvoicedemo.utils.StringUtils;
 import com.example.iflyvoicedemo.utils.XmlUtils;
@@ -32,10 +34,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.realm.Realm;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "wumin";
@@ -48,10 +53,11 @@ public class MainActivity extends AppCompatActivity {
     ImageView ivRefresh;
     @BindView(R.id.iv_speak)
     ImageView ivSpeak;
+    @BindView(R.id.iv_chart)
+    ImageView ivChart;
     private TextView mVoiceText = null;
     private VoiceSynthesizer mVSynthesizer;
     private VoiceRecognizer mVRecognizer;
-    private VoiceWakeup mVWakeup;
     private Toast mToast;
     private Context mContext = null;
     private VoicePopupWindows mVoiceWindows;
@@ -144,9 +150,6 @@ public class MainActivity extends AppCompatActivity {
         mVSynthesizer.startSpeechSynthesizer();
 
         mVRecognizer = new VoiceRecognizer(this);
-
-        mVWakeup = new VoiceWakeup(this);
-        mVWakeup.startWakeup();
     }
 
     public void startVoice(View view) {
@@ -159,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         mVoiceWindows.show(this, view);
+
     }
 
     public void onDebug(View view) {
@@ -226,29 +230,48 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void checkResult(String result) {
+    private void checkResult(String info) {
         CardDataItem item = mDatas.get(curPosition);
-        item.setRecogText(result);
+        item.setRecogText(info);
         String refText = item.getRefText();
         int sum = refText.length();
-        int error = StringUtils.levenshteinCompare(result, refText);
-        float similarity = StringUtils.getSimilarityRatio(result, refText);
+        int error = StringUtils.levenshteinCompare(info, refText);
+        float similarity = StringUtils.getSimilarityRatio(info, refText);
         item.setSum(sum);
         item.setSimilarity(similarity);
         item.setError(error);
         mCardAdapter.notifyDataSetChanged();
 
+        Realm realm = null;
+        try {
+            realm = Realm.getDefaultInstance();
+            VoiceResult result = new VoiceResult(UUID.randomUUID().toString());
+            result.setErrs(error);
+            result.setAccuracy(similarity);
+            realm.beginTransaction();
+            realm.copyToRealm(result);
+            realm.commitTransaction();
+            Log.d(TAG, "SAVED -> " + result.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            realm.close();
+        }
+
     }
 
+    private void startChart() {
+        Intent intent = new Intent(mContext, ChartActivity.class);
+        startActivity(intent);
+    }
     @Override
     protected void onDestroy() {
         Log.i(TAG, "Stop wakeupListener");
-        mVWakeup.stopWakeup();
         EventBus.getDefault().unregister(this);
         super.onDestroy();
     }
 
-    @OnClick({R.id.iv_refresh, R.id.iv_speak})
+    @OnClick({R.id.iv_refresh, R.id.iv_speak, R.id.iv_chart})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.iv_refresh:
@@ -258,6 +281,11 @@ public class MainActivity extends AppCompatActivity {
                 mVRecognizer.startSpeechRecognizer();
 //                mVRecognizer.showVoiceRecognizeDialog();
 //                mVSynthesizer.speakMsg("欢迎使用小七语音助手");
+                break;
+            case R.id.iv_chart:
+                startChart();
+                break;
+            default:
                 break;
         }
     }

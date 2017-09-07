@@ -23,7 +23,7 @@
             android:padding="@dimen/default_textview_padding"
             android:gravity="center"
             android:text="识别文本"
-            android:textColor="@color/colorGrey" />
+            android:textColor="@color/colorBlack" />
         <TextView
             android:id="@+id/tv_ref_text"
             android:layout_width="match_parent"
@@ -44,7 +44,7 @@
             android:padding="@dimen/default_textview_padding"
             android:gravity="center"
             android:text="识别结果"
-            android:textColor="@color/colorGrey" />
+            android:textColor="@color/colorBlack" />
         <TextView
             android:id="@+id/tv_recog_text"
             android:layout_width="match_parent"

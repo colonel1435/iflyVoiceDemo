@@ -2,7 +2,7 @@
     <string name="app_name">IflyVoiceDemo</string>
     <string name="app_title">语音识别测试</string>
     <string name="action_settings">Settings</string>
-    <string name="appid">58ede6e8</string>
+    <string name="appid">584566ca</string>
     <string name="recognize_title">识别中</string>
     <string name="speak_title">请讲话</string>
     <string name="recognize_err">识别失败...</string>
@@ -10,4 +10,11 @@
     <string name="net_err">网络未连接哦...</string>
     <string name="err_code">错误代码(</string>
     <string name="synthesier_msg">您的测量结果为</string>
+    <string name="title_activity_chart">ChartActivity</string>
+    <string name="chart_statistic">数据统计</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_err">错误统计</string>
+    <string name="title_accuracy">准确率统计</string>
 </resources>

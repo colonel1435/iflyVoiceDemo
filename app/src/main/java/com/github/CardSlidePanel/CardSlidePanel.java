@@ -61,7 +61,7 @@ public class CardSlidePanel extends ViewGroup {
     private GestureDetectorCompat moveDetector;
     private Point downPoint = new Point();
     private CardAdapter adapter;
-    private static final int VIEW_COUNT = 3;
+    private static final int VIEW_COUNT = 4;
     private Rect draggableArea;
 
     public CardSlidePanel(Context context) {
