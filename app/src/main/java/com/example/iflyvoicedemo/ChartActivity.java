@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import com.example.iflyvoicedemo.adapter.FragmentPageAdapter;
 import com.example.iflyvoicedemo.bean.chart.ChartConst;
 import com.example.iflyvoicedemo.fragment.BarChartFragment;
+import com.example.iflyvoicedemo.fragment.LineChartFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +59,7 @@ public class ChartActivity extends AppCompatActivity {
         errPage.setArguments(errArgs);
         mPages.add(errPage);
 
-        BarChartFragment accuracyPage = BarChartFragment.newInstance("1", "line");
+        LineChartFragment accuracyPage = LineChartFragment.newInstance("1", "line");
         Bundle accuArgs = new Bundle();
         accuArgs.putInt(ChartConst.TYPE_CHART_KEY, ChartConst.TYPE_LINECHART);
         accuracyPage.setArguments(accuArgs);
