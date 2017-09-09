@@ -182,6 +182,7 @@ public class ChartFragment extends Fragment {
     private void initBarChart() {
         chartErr.setDescription(null);
         chartErr.setNoDataText(getString(R.string.speak_result_null));
+        chartErr.setNoDataTextColor(Color.BLACK);
         // if more than 60 entries are displayed in the chart, no values will be
         // drawn
         chartErr.setMaxVisibleValueCount(60);
@@ -271,11 +272,15 @@ public class ChartFragment extends Fragment {
             realm = Realm.getDefaultInstance();
             RealmResults<VoiceResult> results = realm.where(VoiceResult.class)
                                                             .equalTo("type", mType).findAll();
-            for (int i = 0; i < results.size(); i++) {
-                VoiceResult result = results.get(i);
-                yVals.add(new BarEntry(i, result.getErrs()));
-                yOfflineVals.add(new Entry(i, result.getAccuracy()));
-                Log.d(TAG, result.toString());
+            if (results != null) {
+                for (int i = 0; i < results.size(); i++) {
+                    VoiceResult result = results.get(i);
+                    if (result != null) {
+                        yVals.add(new BarEntry(i, result.getErrs()));
+                        yOfflineVals.add(new Entry(i, result.getAccuracy()));
+                        Log.d(TAG, result.toString());
+                    }
+                }
             }
 
         } catch (Exception e) {
