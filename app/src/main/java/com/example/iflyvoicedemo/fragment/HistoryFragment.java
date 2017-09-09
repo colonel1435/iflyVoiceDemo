@@ -128,7 +128,7 @@ public class HistoryFragment extends Fragment {
         RecyclerItemClickSupport.addTo(rvHistory).setOnItemLongClickListener(new RecyclerItemClickSupport.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClicked(RecyclerView recyclerView, final int position, View v) {
-                final SweetAlertDialog dlg = new SweetAlertDialog(getActivity(), SweetAlertDialog.SUCCESS_TYPE)
+                final SweetAlertDialog dlg = new SweetAlertDialog(getActivity(), SweetAlertDialog.WARNING_TYPE)
                         .setTitleText(getString(R.string.notification_title))
                         .setContentText(getString(R.string.delete_history_item))
                         .setConfirmText(getString(R.string.delete_history_item_ok))
@@ -139,14 +139,18 @@ public class HistoryFragment extends Fragment {
                     public void onClick(SweetAlertDialog sweetAlertDialog) {
                         Realm realm = null;
                         try {
+                            VoiceResult item = mDatas.get(position);
                             realm = Realm.getDefaultInstance();
                             VoiceResult result = realm.where(VoiceResult.class)
-                                                        .equalTo("uid", mDatas.get(position).getUid())
+                                                        .equalTo("uid", item.getUid())
                                                         .findFirst();
                             if (result != null) {
                                 realm.beginTransaction();
                                 result.deleteFromRealm();
                                 realm.commitTransaction();
+                                mDatas.remove(item);
+                                mAdapter.notifyItemRemoved(position);
+                                dlg.dismissWithAnimation();
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
