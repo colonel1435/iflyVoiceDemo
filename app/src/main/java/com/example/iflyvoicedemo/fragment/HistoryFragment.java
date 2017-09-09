@@ -17,6 +17,7 @@ import com.example.iflyvoicedemo.adapter.RecyclerViewCommonAdapter;
 import com.example.iflyvoicedemo.adapter.RecyclerViewHolder;
 import com.example.iflyvoicedemo.bean.VoiceResult;
 import com.example.iflyvoicedemo.utils.StringUtils;
+import com.example.iflyvoicedemo.utils.TipUtils;
 import com.example.iflyvoicedemo.view.HistoryPopupWindows;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
@@ -123,6 +125,44 @@ public class HistoryFragment extends Fragment {
             }
         });
 
+        RecyclerItemClickSupport.addTo(rvHistory).setOnItemLongClickListener(new RecyclerItemClickSupport.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClicked(RecyclerView recyclerView, final int position, View v) {
+                final SweetAlertDialog dlg = new SweetAlertDialog(getActivity(), SweetAlertDialog.SUCCESS_TYPE)
+                        .setTitleText(getString(R.string.notification_title))
+                        .setContentText(getString(R.string.delete_history_item))
+                        .setConfirmText(getString(R.string.delete_history_item_ok))
+                        .setCancelText(getString(R.string.notification_cancle));
+
+                dlg.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sweetAlertDialog) {
+                        Realm realm = null;
+                        try {
+                            realm = Realm.getDefaultInstance();
+                            VoiceResult result = realm.where(VoiceResult.class)
+                                                        .equalTo("uid", mDatas.get(position).getUid())
+                                                        .findFirst();
+                            if (result != null) {
+                                realm.beginTransaction();
+                                result.deleteFromRealm();
+                                realm.commitTransaction();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        } finally {
+                            realm.close();
+                        }
+                    }
+                }).setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sweetAlertDialog) {
+                        dlg.dismissWithAnimation();
+                    }
+                }).show();
+                return true;
+            }
+        });
         return view;
     }
 

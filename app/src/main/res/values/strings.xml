@@ -24,4 +24,8 @@
     <string name="recognize_text_title">识别文本</string>
     <string name="recognize_err_title">错误数</string>
     <string name="recognize_accuracy_title">准确率</string>
+    <string name="notification_title">温馨提示</string>
+    <string name="delete_history_item">确认删除该条测试记录吗?</string>
+    <string name="delete_history_item_ok">确认删除</string>
+    <string name="notification_cancle">取消</string>
 </resources>
