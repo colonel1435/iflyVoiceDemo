@@ -96,6 +96,7 @@ public class VoiceRecognizer {
         recognizerDialog.setParameter(SpeechConstant.ACCENT, "mandarin");
         recognizerDialog.setParameter(SpeechConstant.LANGUAGE, "zh_cn");
         recognizerDialog.setParameter(SpeechConstant.SAMPLE_RATE, "16000");
+        recognizerDialog.setParameter(SpeechConstant.ENGINE_TYPE, SpeechConstant.TYPE_CLOUD);
         recognizerDialog.setListener(mRecognizeListener);
         recognizerDialog.show();
     }
@@ -110,7 +111,6 @@ public class VoiceRecognizer {
         }
     };
 
-    //听写监听器
     private RecognizerListener mRecogListener = new RecognizerListener(){
         public void onResult(RecognizerResult results, boolean isLast) {
             Log.i(TAG, "Recognize result : "+ results.getResultString());
@@ -230,7 +230,7 @@ public class VoiceRecognizer {
         mIat.setParameter(SpeechConstant.VAD_BOS, "3000");
 
         // 设置语音后端点:后端点静音检测时间，即用户停止说话多长时间内即认为不再输入， 自动停止录音
-        mIat.setParameter(SpeechConstant.VAD_EOS, "1000");
+        mIat.setParameter(SpeechConstant.VAD_EOS, "2000");
 
         // 设置标点符号,设置为"0"返回结果无标点,设置为"1"返回结果有标点
         mIat.setParameter(SpeechConstant.ASR_PTT, "1");

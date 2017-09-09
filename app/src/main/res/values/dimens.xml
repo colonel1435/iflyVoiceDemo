@@ -13,4 +13,6 @@
     <dimen name="msg_title_size">24sp</dimen>
     <dimen name="default_textview_padding">5dp</dimen>
     <dimen name="default_image_button_size">64dp</dimen>
+    <dimen name="item_text_font_size">10sp</dimen>
+    <dimen name="default_item_padding">3dp</dimen>
 </resources>

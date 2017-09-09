@@ -17,4 +17,11 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_err">错误统计</string>
     <string name="title_accuracy">准确率统计</string>
+    <string name="speak_result_null">您还未添加识别数据！</string>
+    <string name="title_offline">离线识别</string>
+    <string name="title_online">在线识别</string>
+    <string name="title_activity_histoty">HistotyActivity</string>
+    <string name="recognize_text_title">识别文本</string>
+    <string name="recognize_err_title">错误数</string>
+    <string name="recognize_accuracy_title">准确率</string>
 </resources>

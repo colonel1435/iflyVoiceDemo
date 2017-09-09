@@ -3,6 +3,7 @@ package com.example.iflyvoicedemo;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -15,8 +16,10 @@ import android.widget.Toast;
 import com.example.iflyvoicedemo.bean.MsgVoiceEvent;
 import com.example.iflyvoicedemo.bean.VoiceResult;
 import com.example.iflyvoicedemo.utils.ColorUtils;
+import com.example.iflyvoicedemo.utils.FileUtils;
 import com.example.iflyvoicedemo.utils.StringUtils;
 import com.example.iflyvoicedemo.utils.XmlUtils;
+import com.example.iflyvoicedemo.view.ReflectionImageView;
 import com.example.iflyvoicedemo.view.VoicePopupWindows;
 import com.github.CardSlidePanel.CardAdapter;
 import com.github.CardSlidePanel.CardDataItem;
@@ -30,12 +33,12 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -55,6 +58,10 @@ public class MainActivity extends AppCompatActivity {
     ImageView ivSpeak;
     @BindView(R.id.iv_chart)
     ImageView ivChart;
+    @BindView(R.id.iv_action_add)
+    ImageView ivActionAdd;
+    @BindView(R.id.iv_history)
+    ReflectionImageView ivHistory;
     private TextView mVoiceText = null;
     private VoiceSynthesizer mVSynthesizer;
     private VoiceRecognizer mVRecognizer;
@@ -83,7 +90,13 @@ public class MainActivity extends AppCompatActivity {
         mDatas = new ArrayList<>();
         InputStream inputStream = null;
         try {
-            inputStream = getAssets().open("pre-shift-meeting.xml");
+            File textFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath(),
+                    "pre-shift-meeting.xml");
+            if (textFile.exists()) {
+                inputStream = FileUtils.openInputStream(textFile);
+            } else {
+                inputStream = getAssets().open("pre-shift-meeting.xml");
+            }
             mDatas.addAll(XmlUtils.parseCardData(inputStream));
         } catch (IOException e) {
             e.printStackTrace();
@@ -193,10 +206,9 @@ public class MainActivity extends AppCompatActivity {
                 mVoiceWindows.showMsg(msg, R.drawable.warning);
                 break;
             case VoiceRecognizer.RECOGNIZE_FINISH:
-                mVoiceWindows.dismiss();
                 if (!event.getMsg().equals("")) {
 //                    mVSynthesizer.speakMsg(getString(R.string.synthesier_msg) + event.getMsg());
-                    checkResult(event.getMsg());
+                    checkResult(event.getMsg(), SpeechConstant.TYPE_CLOUD);
                 }
                 break;
             case VoiceRecognizer.OFFLINE_START_VOICE:
@@ -221,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
                 mVoiceWindows.dismiss();
                 if (!event.getMsg().equals("")) {
 //                    mVSynthesizer.speakMsg(getString(R.string.synthesier_msg) + event.getMsg());
-                    checkResult(event.getMsg());
+                    checkResult(event.getMsg(), SpeechConstant.TYPE_LOCAL);
                 }
                 break;
             default:
@@ -230,8 +242,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void checkResult(String info) {
+    private void checkResult(String info, String type) {
         CardDataItem item = mDatas.get(curPosition);
+        item.setType(type);
         item.setRecogText(info);
         String refText = item.getRefText();
         int sum = refText.length();
@@ -246,6 +259,9 @@ public class MainActivity extends AppCompatActivity {
         try {
             realm = Realm.getDefaultInstance();
             VoiceResult result = new VoiceResult(UUID.randomUUID().toString());
+            result.setText(item.getRefText());
+            result.setText(item.getRecogText());
+            result.setType(type);
             result.setErrs(error);
             result.setAccuracy(similarity);
             realm.beginTransaction();
@@ -264,6 +280,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(mContext, ChartActivity.class);
         startActivity(intent);
     }
+
     @Override
     protected void onDestroy() {
         Log.i(TAG, "Stop wakeupListener");
@@ -271,7 +288,8 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    @OnClick({R.id.iv_refresh, R.id.iv_speak, R.id.iv_chart})
+    @OnClick({R.id.iv_refresh, R.id.iv_speak, R.id.iv_chart,
+            R.id.iv_action_add, R.id.iv_history})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.iv_refresh:
@@ -284,6 +302,11 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.iv_chart:
                 startChart();
+                break;
+            case R.id.iv_action_add:
+                break;
+            case R.id.iv_history:
+                startActivity(new Intent(mContext, HistotyActivity.class));
                 break;
             default:
                 break;

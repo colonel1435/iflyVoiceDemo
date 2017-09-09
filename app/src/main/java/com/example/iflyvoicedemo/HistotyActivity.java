@@ -7,11 +7,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.view.MenuItem;
 import android.widget.ImageView;
 
 import com.example.iflyvoicedemo.adapter.FragmentPageAdapter;
-import com.example.iflyvoicedemo.fragment.ChartFragment;
+import com.example.iflyvoicedemo.fragment.HistoryFragment;
 import com.iflytek.cloud.SpeechConstant;
 
 import java.util.ArrayList;
@@ -19,15 +18,16 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
+import github.chenupt.springindicator.SpringIndicator;
 
-public class ChartActivity extends AppCompatActivity {
-    @BindView(R.id.tl_chart)
-    TabLayout mTablayout;
-    @BindView(R.id.vp_container)
-    ViewPager mViewpager;
-    @BindView(R.id.iv_back)
+public class HistotyActivity extends AppCompatActivity {
+
+    @BindView(R.id.iv_back_history)
     ImageView ivBack;
+    @BindView(R.id.vp_container_history)
+    ViewPager mViewpager;
+    @BindView(R.id.history_indicator)
+    SpringIndicator historyIndicator;
     private Context mContext;
     private List<String> mTitle;
     private List<Fragment> mPages;
@@ -37,14 +37,12 @@ public class ChartActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_chart);
+        setContentView(R.layout.activity_histoty);
         ButterKnife.bind(this);
-
         mContext = this;
 
         initData();
         initView();
-
     }
 
     private void initView() {
@@ -52,18 +50,19 @@ public class ChartActivity extends AppCompatActivity {
 //        setSupportActionBar(toolbar);
 //        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        ChartFragment offlinePage = ChartFragment.newInstance("0", SpeechConstant.TYPE_LOCAL);
+        HistoryFragment offlinePage = HistoryFragment.newInstance("0", SpeechConstant.TYPE_LOCAL);
         mPages.add(offlinePage);
 
-        ChartFragment onlinePage = ChartFragment.newInstance("1", SpeechConstant.TYPE_CLOUD);
+        HistoryFragment onlinePage = HistoryFragment.newInstance("1", SpeechConstant.TYPE_CLOUD);
         mPages.add(onlinePage);
 
         FragmentManager fm = getSupportFragmentManager();
         mPageAdapter = new FragmentPageAdapter(fm, mPages, mTitle);
         mViewpager.setAdapter(mPageAdapter);
-        mTablayout.setupWithViewPager(mViewpager);
         mPageChangeListener = new MyPageChangeListener();
         mViewpager.addOnPageChangeListener(mPageChangeListener);
+
+        historyIndicator.setViewPager(mViewpager);
     }
 
     private void initData() {
@@ -72,24 +71,6 @@ public class ChartActivity extends AppCompatActivity {
         mTitle.add(getString(R.string.title_online));
 
         mPages = new ArrayList<>();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        switch (id) {
-            case android.R.id.home:
-                finish();
-                break;
-            default:
-                break;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @OnClick(R.id.iv_back)
-    public void onViewClicked() {
-        finish();
     }
 
     private class MyPageChangeListener implements ViewPager.OnPageChangeListener {

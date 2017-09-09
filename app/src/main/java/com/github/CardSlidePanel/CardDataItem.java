@@ -9,6 +9,7 @@ package com.github.CardSlidePanel;
 
 public class CardDataItem {
     private int color;
+    private String type;
     private String refText;
     private String recogText;
     private float accuracyRate;
@@ -25,6 +26,14 @@ public class CardDataItem {
 
     public void setColor(int color) {
         this.color = color;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getRefText() {
@@ -79,6 +88,7 @@ public class CardDataItem {
     public String toString() {
         return "CardDataItem{" +
                 "color=" + color +
+                ", type='" + type + '\'' +
                 ", refText='" + refText + '\'' +
                 ", recogText='" + recogText + '\'' +
                 ", accuracyRate=" + accuracyRate +
