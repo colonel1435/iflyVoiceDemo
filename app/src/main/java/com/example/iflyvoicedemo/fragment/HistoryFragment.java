@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupWindow;
 
 import com.example.iflyvoicedemo.R;
 import com.example.iflyvoicedemo.adapter.RecyclerItemClickSupport;
@@ -116,7 +117,7 @@ public class HistoryFragment extends Fragment {
         RecyclerItemClickSupport.addTo(rvHistory).setOnItemClickListener(new RecyclerItemClickSupport.OnItemClickListener() {
             @Override
             public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-                HistoryPopupWindows popupwindows = new HistoryPopupWindows(getActivity());
+                final HistoryPopupWindows popupwindows = new HistoryPopupWindows(getActivity());
                 popupwindows.setResult(mDatas.get(position));
                 popupwindows.show(getActivity(), v);
             }

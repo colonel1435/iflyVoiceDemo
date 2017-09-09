@@ -45,7 +45,7 @@ public class HistoryPopupWindows extends PopupWindow {
         mRefText = (TextView) popupView.findViewById(R.id.tv_ref_text_history);
         mRecogText = (TextView) popupView.findViewById(R.id.tv_recog_text_history);
         mErrs = (TextView) popupView.findViewById(R.id.tv_err_history);
-        mAccuracy = (TextView) popupView.findViewById(R.id.tv_accuracy_history);
+        mAccuracy = (TextView) popupView.findViewById(R.id.tv_similarity_history);
 
         this.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
         this.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -72,13 +72,7 @@ public class HistoryPopupWindows extends PopupWindow {
     }
 
     public void show(Activity context, View view) {
-        dardBackground(context, 0.6f);
         this.showAtLocation(view, Gravity.CENTER, 0 , 0);
-    }
-
-    public void dismiss(Activity context) {
-        super.dismiss();
-        dardBackground(context, 1.0f);
     }
 
 }

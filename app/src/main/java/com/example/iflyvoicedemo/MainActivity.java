@@ -260,7 +260,7 @@ public class MainActivity extends AppCompatActivity {
             realm = Realm.getDefaultInstance();
             VoiceResult result = new VoiceResult(UUID.randomUUID().toString());
             result.setText(item.getRefText());
-            result.setText(item.getRecogText());
+            result.setResult(item.getRecogText());
             result.setType(type);
             result.setErrs(error);
             result.setAccuracy(similarity);
