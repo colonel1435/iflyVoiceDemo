@@ -1,13 +1,17 @@
 package com.example.iflyvoicedemo;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -39,6 +43,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.zip.Inflater;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -281,6 +286,36 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    private void startNew() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.popupwindows_new, null);
+        final EditText text = (EditText) view.findViewById(R.id.et_input_text);
+        builder.setView(view);
+        builder.setPositiveButton(getString(R.string.notification_ok),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String input = text.getText().toString();
+                        if (input.equals("")) {
+                            Toast.makeText(mContext, "您未输入任何识别文本！", Toast.LENGTH_LONG).show();
+                        } else {
+                            CardDataItem item = new CardDataItem();
+                            item.setRefText(text.getText().toString());
+                            mDatas.add(item);
+                            mCardAdapter.notifyDataSetChanged();
+                        }
+                    }
+                });
+        builder.setNegativeButton(getString(R.string.notification_cancle),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+        builder.show();
+    }
+
     @Override
     protected void onDestroy() {
         Log.i(TAG, "Stop wakeupListener");
@@ -304,6 +339,7 @@ public class MainActivity extends AppCompatActivity {
                 startChart();
                 break;
             case R.id.iv_action_add:
+                startNew();
                 break;
             case R.id.iv_history:
                 startActivity(new Intent(mContext, HistotyActivity.class));
