@@ -154,7 +154,10 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 CardDataItem item = mDatas.get(index);
-                item.setColor(ColorUtils.getRandomColor(mContext));
+                Log.d("wumin", "Color -> " + item.getColor());
+                if (item.getColor() == 0) {
+                    item.setColor(ColorUtils.getRandomColor(mContext));
+                }
                 viewHolder.bindData(item);
             }
         };
