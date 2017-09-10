@@ -1,5 +1,7 @@
 package com.github.CardSlidePanel;
 
+import io.realm.RealmObject;
+
 /**
  * Description
  * Author : Mr.wumin
@@ -7,7 +9,7 @@ package com.github.CardSlidePanel;
  * Date   : 2017/9/6 0006 11:28
  */
 
-public class CardDataItem {
+public class CardDataItem extends RealmObject {
     private int color;
     private String type;
     private String refText;

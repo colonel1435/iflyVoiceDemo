@@ -43,12 +43,14 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.zip.Inflater;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.realm.Realm;
+import io.realm.RealmResults;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "wumin";
@@ -94,7 +96,9 @@ public class MainActivity extends AppCompatActivity {
     private void initData() {
         mDatas = new ArrayList<>();
         InputStream inputStream = null;
+        Realm realm = null;
         try {
+            realm = Realm.getDefaultInstance();
             File textFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath(),
                     "pre-shift-meeting.xml");
             if (textFile.exists()) {
@@ -103,10 +107,15 @@ public class MainActivity extends AppCompatActivity {
                 inputStream = getAssets().open("pre-shift-meeting.xml");
             }
             mDatas.addAll(XmlUtils.parseCardData(inputStream));
+
+            RealmResults<CardDataItem> results = realm.where(CardDataItem.class).findAll();
+            mDatas.addAll(realm.copyFromRealm(results));
         } catch (IOException e) {
             e.printStackTrace();
         } catch (XmlPullParserException e) {
             e.printStackTrace();
+        } finally {
+            realm.close();
         }
     }
 
@@ -302,10 +311,21 @@ public class MainActivity extends AppCompatActivity {
                         if (input.equals("")) {
                             Toast.makeText(mContext, "您未输入任何识别文本！", Toast.LENGTH_LONG).show();
                         } else {
-                            CardDataItem item = new CardDataItem();
-                            item.setRefText(text.getText().toString());
-                            mDatas.add(item);
-                            mCardAdapter.notifyDataSetChanged();
+                            Realm realm = null;
+                            try {
+                                CardDataItem item = new CardDataItem();
+                                item.setRefText(text.getText().toString());
+                                mDatas.add(item);
+                                mCardAdapter.notifyDataSetChanged();
+
+                                realm.beginTransaction();
+                                realm.copyToRealm(item);
+                                realm.commitTransaction();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            } finally {
+                                realm.close();
+                            }
                         }
                     }
                 });

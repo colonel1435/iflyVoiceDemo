@@ -96,6 +96,7 @@ public class VoiceRecognizer {
         recognizerDialog.setParameter(SpeechConstant.ACCENT, "mandarin");
         recognizerDialog.setParameter(SpeechConstant.LANGUAGE, "zh_cn");
         recognizerDialog.setParameter(SpeechConstant.SAMPLE_RATE, "16000");
+        recognizerDialog.setParameter(SpeechConstant.ASR_PTT, "1");
         recognizerDialog.setParameter(SpeechConstant.ENGINE_TYPE, SpeechConstant.TYPE_CLOUD);
         recognizerDialog.setListener(mRecognizeListener);
         recognizerDialog.show();

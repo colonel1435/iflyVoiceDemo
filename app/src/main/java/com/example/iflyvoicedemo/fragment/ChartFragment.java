@@ -171,6 +171,7 @@ public class ChartFragment extends Fragment {
         leftAxis.enableGridDashedLine(10f, 10f, 0f);
         leftAxis.setDrawZeroLine(true);
         leftAxis.setValueFormatter(new PercentFormatter());
+        lineChartErr.getAxisRight().setEnabled(false);
 
         // limit lines are drawn behind data (and not on top)
         leftAxis.setDrawLimitLinesBehindData(true);
@@ -305,6 +306,9 @@ public class ChartFragment extends Fragment {
                 }
             }
 
+            if (yVals.size() == 0) {
+                yVals.add(new BarEntry(0, 0));
+            }
             if (yOfflineVals.size() == 0) {
                 yOfflineVals.add(new Entry(0, 0));
             }
