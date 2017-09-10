@@ -134,9 +134,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCardVanish(int index, int type) {
                 Log.d("Card", "正在消失-" + mDatas.get(index).getRefText() + " 消失type=" + type);
-//                CardDataItem item = mDatas.get(index);
-//                mDatas.add(item);
-//                mCardAdapter.notifyDataSetChanged();
+                CardDataItem item = mDatas.get(index);
+                mDatas.add(item);
             }
         };
         slidePanel.setCardSwitchListener(cardSwitchListener);
