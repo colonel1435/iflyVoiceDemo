@@ -68,7 +68,8 @@ public class VoiceRecognizer {
         public void onResult(RecognizerResult recognizerResult, boolean b) {
             Log.i(TAG, "Recognize result : "+recognizerResult.getResultString());
             String voiceInfo = JsonParser.parseIatResult(recognizerResult.getResultString());
-            if (voiceInfo.compareTo("last") == 0)
+            if (voiceInfo.compareTo("last") == 0 ||
+                voiceInfo.equals("。"))
                 return;
             Toast.makeText(mContext, voiceInfo, Toast.LENGTH_LONG).show();
             EventBus.getDefault().post(new MsgVoiceEvent(RECOGNIZE_FINISH, voiceInfo));
